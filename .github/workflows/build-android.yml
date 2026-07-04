@@ -1,4 +1,4 @@
-name: Build Unsigned Android Release APK
+name: Build Signed Android Release APK
 
 on:
   push:
@@ -6,6 +6,13 @@ on:
 jobs:
   build-release-apk:
     runs-on: ubuntu-latest
+
+    env:
+      # Keystore and signing secrets (all should be set in repo/org Secrets)
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -21,16 +28,28 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Decode keystore from base64
+        shell: bash
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build unsigned release APK
-        run: ./gradlew :androidApp:assembleRelease
+      - name: Build signed release APK
+        env:
+          SIGNING_STORE_FILE: ${{ runner.temp }}/release.keystore
+        run: |
+          ./gradlew :androidApp:assembleRelease \
+            -Pandroid.injected.signing.store.file="$SIGNING_STORE_FILE" \
+            -Pandroid.injected.signing.store.password="$ANDROID_KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$ANDROID_KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$ANDROID_KEY_PASSWORD"
 
-      - name: Upload release APK artifact
+      - name: Upload signed release APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release-apk
+          name: signed-release-apk
           path: |
             androidApp/build/outputs/apk/release/*.apk
             androidApp/build/outputs/apk/*/release/*.apk

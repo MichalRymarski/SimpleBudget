@@ -2,6 +2,24 @@ name: Build Signed Android Release APK
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag for the release (e.g. v1.2.3). If empty, uses v${{ github.run_number }}'
+        required: false
+      release_name:
+        description: 'Release name. If empty, uses "Release #<run_number>"'
+        required: false
+      draft:
+        description: 'Create release as draft?'
+        required: false
+        default: 'false'
+      prerelease:
+        description: 'Create release as prerelease?'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write
 
 jobs:
   build-release-apk:
@@ -54,3 +72,65 @@ jobs:
             androidApp/build/outputs/apk/release/*.apk
             androidApp/build/outputs/apk/*/release/*.apk
           if-no-files-found: error
+
+      - name: Determine release tag and name
+        id: release_meta
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          if [ -z "$TAG" ]; then
+            TAG="v${{ github.run_number }}"
+          fi
+          NAME="${{ github.event.inputs.release_name }}"
+          if [ -z "$NAME" ]; then
+            NAME="Release #${{ github.run_number }}"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "name=$NAME" >> $GITHUB_OUTPUT
+          echo "draft=${{ github.event.inputs.draft }}" >> $GITHUB_OUTPUT
+          echo "prerelease=${{ github.event.inputs.prerelease }}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.release_meta.outputs.tag }}
+          release_name: ${{ steps.release_meta.outputs.name }}
+          draft: ${{ steps.release_meta.outputs.draft }}
+          prerelease: ${{ steps.release_meta.outputs.prerelease }}
+          body: 'Automated release created by CI (Build Signed Android Release APK workflow)'
+
+      - name: Upload APK(s) to Release
+        if: steps.create_release.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
+        run: |
+          set -e
+          # Upload APKs from standard build paths
+          APK_PATHS=(androidApp/build/outputs/apk/release/*.apk androidApp/build/outputs/apk/*/release/*.apk)
+          any_uploaded=false
+          for p in "${APK_PATHS[@]}"; do
+            for apk in $p; do
+              if [ -f "$apk" ]; then
+                any_uploaded=true
+                filename=$(basename "$apk")
+                echo "Uploading $apk as $filename ..."
+                # upload_url has {?name,label} template; append ?name=
+                curl \
+                  -sS \
+                  -X POST \
+                  -H "Authorization: token $GITHUB_TOKEN" \
+                  -H "Content-Type: application/vnd.android.package-archive" \
+                  --data-binary @"$apk" \
+                  "$UPLOAD_URL?name=$filename" \
+                || { echo "Upload failed for $apk"; exit 1; }
+              fi
+            done
+          done
+
+          if [ "$any_uploaded" = false ]; then
+            echo "No APK files found to upload"
+            exit 1
+          fi

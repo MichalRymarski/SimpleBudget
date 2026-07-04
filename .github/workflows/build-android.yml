@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag for the release (e.g. v1.2.3). If empty, uses v${{ github.run_number }}'
+        description: 'Tag for the release (e.g. v1.2.3). If empty, uses v<run_number>'
         required: false
       release_name:
         description: 'Release name. If empty, uses "Release #<run_number>"'

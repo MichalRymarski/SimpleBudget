@@ -1,0 +1,15 @@
+<resources>
+    <!-- Home -->
+    <string name="home_parishes_title">Parishes</string>
+    <string name="home_parishes_subtitle">Click a parish to enter</string>
+    <string name="home_bible_title">Bible</string>
+    <string name="home_profile_title">Profile</string>
+    <string name="home_fab_content_description">Quick actions</string>
+    <string name="home_bottom_sheet_title">Quick Actions</string>
+    <string name="home_bottom_sheet_join_parish">Join Parish</string>
+    <string name="home_bottom_sheet_create_parish">Create Parish</string>
+    <string name="home_bottom_sheet_scan_qr">Scan QR Code</string>
+
+    <!-- Accessibility -->
+    <string name="missing_accessibility">Missing accessibility</string>
+</resources>

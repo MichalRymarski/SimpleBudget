@@ -1,7 +1,7 @@
 name: Build Signed Android Release APK
 
 on:
-  push:
+  workflow_dispatch:
 
 jobs:
   build-release-apk:

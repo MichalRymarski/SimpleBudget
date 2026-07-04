@@ -26,7 +26,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # Keystore and signing secrets (all should be set in repo/org Secrets)
       ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -86,51 +85,15 @@ jobs:
           fi
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "name=$NAME" >> $GITHUB_OUTPUT
-          echo "draft=${{ github.event.inputs.draft }}" >> $GITHUB_OUTPUT
-          echo "prerelease=${{ github.event.inputs.prerelease }}" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release and upload APK
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release_meta.outputs.tag }}
-          release_name: ${{ steps.release_meta.outputs.name }}
-          draft: ${{ steps.release_meta.outputs.draft }}
-          prerelease: ${{ steps.release_meta.outputs.prerelease }}
-          body: 'Automated release created by CI (Build Signed Android Release APK workflow)'
-
-      - name: Upload APK(s) to Release
-        if: steps.create_release.outcome == 'success'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
-        run: |
-          set -e
-          # Upload APKs from standard build paths
-          APK_PATHS=(androidApp/build/outputs/apk/release/*.apk androidApp/build/outputs/apk/*/release/*.apk)
-          any_uploaded=false
-          for p in "${APK_PATHS[@]}"; do
-            for apk in $p; do
-              if [ -f "$apk" ]; then
-                any_uploaded=true
-                filename=$(basename "$apk")
-                echo "Uploading $apk as $filename ..."
-                # upload_url has {?name,label} template; append ?name=
-                curl \
-                  -sS \
-                  -X POST \
-                  -H "Authorization: token $GITHUB_TOKEN" \
-                  -H "Content-Type: application/vnd.android.package-archive" \
-                  --data-binary @"$apk" \
-                  "$UPLOAD_URL?name=$filename" \
-                || { echo "Upload failed for $apk"; exit 1; }
-              fi
-            done
-          done
-
-          if [ "$any_uploaded" = false ]; then
-            echo "No APK files found to upload"
-            exit 1
-          fi
+          name: ${{ steps.release_meta.outputs.name }}
+          draft: ${{ github.event.inputs.draft == 'true' }}
+          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
+          body: 'Automated release created by CI'
+          files: |
+            androidApp/build/outputs/apk/release/*.apk
+            androidApp/build/outputs/apk/*/release/*.apk

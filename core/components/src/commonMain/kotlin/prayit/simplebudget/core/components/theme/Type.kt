@@ -6,7 +6,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import simplebudget.core.resources.generated.resources.CormorantGaramond_Bold
 import simplebudget.core.resources.generated.resources.CormorantGaramond_Regular
-import simplebudget.core.resources.generated.resources.CormorantGaramond_SemiBold
 import simplebudget.core.resources.generated.resources.Res
 import simplebudget.core.resources.generated.resources.RobotoFlex
 import org.jetbrains.compose.resources.Font
@@ -19,7 +18,6 @@ fun appTypography(): Typography {
 
     val displayFontFamily = FontFamily(
         Font(Res.font.CormorantGaramond_Regular, weight = FontWeight.Normal),
-        Font(Res.font.CormorantGaramond_SemiBold, weight = FontWeight.SemiBold),
         Font(Res.font.CormorantGaramond_Bold, weight = FontWeight.Bold),
     )
 

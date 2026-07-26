@@ -1,0 +1,10 @@
+-dontwarn org.apache.poi.**
+-dontwarn org.apache.xmlbeans.**
+-dontwarn org.apache.logging.log4j.**
+-dontwarn org.openxmlformats.**
+-dontwarn javax.xml.stream.**
+-dontwarn net.sf.saxon.**
+-dontwarn org.osgi.**
+-dontwarn edu.umd.cs.findbugs.**
+-dontwarn aQute.bnd.annotation.**
+-dontwarn org.apache.xmlbeans.**

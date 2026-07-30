@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
@@ -36,6 +35,7 @@ kotlin {
             api(project(":core:data"))
             api(project(":core:export"))
             api(project(":feature:home"))
+            api(project(":feature:budgetItem"))
             api(libs.compose.runtime)
             api(libs.compose.ui)
             api(libs.compose.foundation)

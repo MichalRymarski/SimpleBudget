@@ -22,6 +22,10 @@ class ExpenseRepositoryImpl(
         }
     }
 
+    override suspend fun getById(id: String): Expense? {
+        return expenseDao.getById(id)?.toDomain()
+    }
+
     override suspend fun insertExpense(expense: Expense) {
         expenseDao.insert(expense.toEntity())
     }

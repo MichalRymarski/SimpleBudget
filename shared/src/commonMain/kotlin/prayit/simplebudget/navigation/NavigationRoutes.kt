@@ -12,10 +12,14 @@ sealed interface HomeRoute : NavKey {
     @Serializable data object Main : HomeRoute
 }
 
+@Serializable
+data class BudgetItemRoute(val id: String) : NavKey
+
 internal val navConfig = SavedStateConfiguration {
     serializersModule = SerializersModule {
         polymorphic(NavKey::class) {
             subclass(HomeRoute.Main::class)
+            subclass(BudgetItemRoute::class)
         }
     }
 }

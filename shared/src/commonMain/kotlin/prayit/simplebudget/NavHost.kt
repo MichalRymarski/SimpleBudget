@@ -6,7 +6,9 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import prayit.simplebudget.core.components.theme.MParafiaTheme
 import prayit.simplebudget.di.Graph
+import prayit.simplebudget.feature.budgetitem.ui.BudgetItemScreen
 import prayit.simplebudget.feature.home.ui.HomeScreen
+import prayit.simplebudget.navigation.BudgetItemRoute
 import prayit.simplebudget.navigation.HomeRoute
 import prayit.simplebudget.navigation.navConfig
 import prayit.simplebudget.navigation.rememberDeviceClass
@@ -22,6 +24,7 @@ fun NavHost(
     val defaultOnBack: () -> Unit = { backStack.removeLastOrNull() }
 
     val homeViewModel = Graph.app.homeViewModel
+    val budgetItemViewModel = Graph.app.budgetItemViewModel
 
     MParafiaTheme(
         isDark = isDark,
@@ -35,6 +38,15 @@ fun NavHost(
                 entry<HomeRoute.Main> {
                     HomeScreen(
                         viewModel = homeViewModel,
+                        deviceClass = deviceClass,
+                        onBack = defaultOnBack,
+                        onExpenseClick = { id -> backStack.add(BudgetItemRoute(id)) },
+                    )
+                }
+                entry<BudgetItemRoute> { route ->
+                    BudgetItemScreen(
+                        viewModel = budgetItemViewModel,
+                        id = route.id,
                         deviceClass = deviceClass,
                         onBack = defaultOnBack,
                     )

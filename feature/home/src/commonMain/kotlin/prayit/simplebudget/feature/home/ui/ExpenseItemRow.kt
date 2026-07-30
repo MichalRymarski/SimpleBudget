@@ -1,6 +1,7 @@
 package prayit.simplebudget.feature.home.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,11 +20,15 @@ import androidx.compose.ui.unit.dp
 import prayit.simplebudget.feature.home.state.ExpenseItem
 
 @Composable
-internal fun ExpenseItemRow(item: ExpenseItem) {
+internal fun ExpenseItemRow(
+    item: ExpenseItem,
+    onClick: () -> Unit = {},
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,

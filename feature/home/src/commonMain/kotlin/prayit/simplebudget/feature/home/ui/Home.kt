@@ -31,6 +31,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     deviceClass: DeviceClass = DeviceClass.PhonePortrait,
     onBack: () -> Unit = {},
+    onExpenseClick: (id: String) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -48,6 +49,7 @@ fun HomeScreen(
         onTagSelected = viewModel::onTagSelected,
         onDateSelected = viewModel::onDateSelected,
         onConfirmAdd = viewModel::onConfirmAdd,
+        onExpenseClick = onExpenseClick,
     )
 }
 
@@ -67,6 +69,7 @@ fun HomeContent(
     onTagSelected: (FinancialTag) -> Unit = {},
     onDateSelected: (kotlinx.datetime.LocalDate) -> Unit = {},
     onConfirmAdd: () -> Unit = {},
+    onExpenseClick: (id: String) -> Unit = {},
 ) {
     val content = state as? HomeState.Content ?: return
 
@@ -115,7 +118,10 @@ fun HomeContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(content.items, key = { it.id }) { item ->
-                    ExpenseItemRow(item = item)
+                    ExpenseItemRow(
+                        item = item,
+                        onClick = { onExpenseClick(item.id) },
+                    )
                 }
             }
 

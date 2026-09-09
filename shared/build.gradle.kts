@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
@@ -23,8 +24,26 @@ kotlin {
         compilerOptions { jvmTarget = JvmTarget.JVM_17 }
     }
 
+    wasmJs {
+        browser()
+        binaries.executable()
+    }
+
     iosArm64()
     iosSimulatorArm64()
+
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyDefaultHierarchyTemplate {
+        common {
+            group("nonJs") {
+                withAndroidTarget()
+                withJvm()
+                group("ios") {
+                    withIos()
+                }
+            }
+        }
+    }
 
     sourceSets {
         commonMain.dependencies {

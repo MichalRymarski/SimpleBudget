@@ -1,7 +1,6 @@
 package prayit.simplebudget.export
 
 import no.synth.kmpzip.io.ByteArrayOutputStream
-import no.synth.kmpzip.io.readBytes
 import no.synth.kmpzip.zip.ZipEntry
 import no.synth.kmpzip.zip.ZipInputStream
 import no.synth.kmpzip.zip.ZipOutputStream

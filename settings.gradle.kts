@@ -41,6 +41,7 @@ val moduleList = listOf(
     ":core:export",
     ":feature:home",
     ":feature:budgetItem",
+    ":webApp",
 )
 moduleList.forEach {
     include(it)

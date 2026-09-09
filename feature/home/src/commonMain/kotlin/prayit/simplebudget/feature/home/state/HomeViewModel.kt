@@ -5,8 +5,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -19,8 +19,9 @@ import prayit.simplebudget.core.domain.model.Expense
 import prayit.simplebudget.core.domain.repository.ExpenseRepository
 import prayit.simplebudget.core.utils.Month
 import prayit.simplebudget.export.CsvGenerator
-import prayit.simplebudget.export.shareCsvFile
+import prayit.simplebudget.export.generateSingleMonthXlsx
 import prayit.simplebudget.export.generateXlsx
+import prayit.simplebudget.export.shareCsvFile
 import prayit.simplebudget.export.shareXlsxFile
 import kotlin.time.Clock
 
@@ -138,6 +139,16 @@ class HomeViewModel(
             val monthNum = (my.month.ordinal + 1).toString().padStart(2, '0')
             val fileName = "Budget-$monthNum.${my.year}.csv"
             shareCsvFile(fileName, csv, "Budget-$monthNum.${my.year}")
+        }
+    }
+
+    fun onExportMonthXlsx() {
+        scope.launch {
+            val allExpenses = expenseRepository.getExpenses().first()
+            val my = _monthYear.value
+            val xlsx = generateSingleMonthXlsx(allExpenses, my.month, my.year)
+            val monthNum = (my.month.ordinal + 1).toString().padStart(2, '0')
+            shareXlsxFile("Budget-$monthNum.${my.year}.xlsx", xlsx, "Budget-$monthNum.${my.year}")
         }
     }
 

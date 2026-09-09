@@ -43,6 +43,7 @@ fun HomeScreen(
         onNextMonth = viewModel::onNextMonth,
         onAddClick = viewModel::onToggleAddSheet,
         onExportMonth = viewModel::onExportMonth,
+        onExportMonthXlsx = viewModel::onExportMonthXlsx,
         onExportHistory = viewModel::onExportHistory,
         onTitleChanged = viewModel::onTitleChanged,
         onAmountChanged = viewModel::onAmountChanged,
@@ -63,6 +64,7 @@ fun HomeContent(
     onNextMonth: () -> Unit = {},
     onAddClick: () -> Unit = {},
     onExportMonth: () -> Unit = {},
+    onExportMonthXlsx: () -> Unit = {},
     onExportHistory: () -> Unit = {},
     onTitleChanged: (String) -> Unit = {},
     onAmountChanged: (String) -> Unit = {},
@@ -132,6 +134,7 @@ fun HomeContent(
                 onNextMonth = onNextMonth,
                 onAddClick = onAddClick,
                 onExportMonth = onExportMonth,
+                onExportMonthXlsx = onExportMonthXlsx,
                 onExportHistory = onExportHistory,
             )
         }

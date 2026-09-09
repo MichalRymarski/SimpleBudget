@@ -20,7 +20,8 @@ kotlinx-datetime = "0.8.0"
 room = "2.8.4"
 ksp = "2.3.9"
 compose-icons = "2.2.1"
-apache-poi = "5.3.0"
+kexcel = "0.1.1"
+kmp-zip = "0.13.0"
 
 [libraries]
 
@@ -58,10 +59,11 @@ coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 icons-lucide-cmp = { module = "com.composables:icons-lucide-cmp", version.ref = "compose-icons" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kexcel = { module = "com.gyanoba.kexcel:kexcel", version.ref = "kexcel" }
+kmp-zip = { module = "no.synth:kmp-zip", version.ref = "kmp-zip" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version = "2.6.2" }
-apache-poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "apache-poi" }
 
 [plugins]
 

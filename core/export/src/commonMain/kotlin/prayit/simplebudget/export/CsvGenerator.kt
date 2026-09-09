@@ -116,7 +116,7 @@ object CsvGenerator {
         val maxRows = maxOf(expenseRows.size, tagTotals.size + 1)
 
         return buildString {
-            appendLine("Date,Title,Tag,Amount,Sum,Difference,,Tag,SUM of Amount")
+            appendLine("Date,Title,Tag,Amount,Sum,Difference,,Tag,Sum of Amount")
 
             for (i in 0 until maxRows) {
                 val left = if (i < expenseRows.size) expenseRows[i] else listOf("", "", "", "", "", "")

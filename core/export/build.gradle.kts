@@ -26,14 +26,12 @@ kotlin {
             api(project(":core:domain"))
             api(project(":core:utils"))
             implementation(libs.kotlinx.datetime)
+            implementation(libs.kexcel)
+            implementation(libs.kmp.zip)
         }
         androidMain.dependencies {
             implementation(project(":core:data"))
             implementation(libs.androidx.core.ktx)
-            implementation(libs.apache.poi.ooxml)
-        }
-        jvmMain.dependencies {
-            implementation(libs.apache.poi.ooxml)
         }
     }
 }

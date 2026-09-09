@@ -22,9 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.ChevronLeft
 import com.composables.icons.lucide.ChevronRight
-import com.composables.icons.lucide.Download
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Plus
+import com.composables.icons.lucide.Share
 import prayit.simplebudget.core.utils.Month
 
 @Composable
@@ -35,6 +35,7 @@ internal fun MonthBar(
     onNextMonth: () -> Unit,
     onAddClick: () -> Unit,
     onExportMonth: () -> Unit = {},
+    onExportMonthXlsx: () -> Unit = {},
     onExportHistory: () -> Unit = {},
 ) {
     var showExportMenu by remember { mutableStateOf(false) }
@@ -68,7 +69,7 @@ internal fun MonthBar(
         ) {
             Box {
                 IconButton(onClick = { showExportMenu = true }) {
-                    Icon(Lucide.Download, contentDescription = "Export")
+                    Icon(Lucide.Share, contentDescription = "Export")
                 }
 
                 DropdownMenu(
@@ -80,6 +81,13 @@ internal fun MonthBar(
                         onClick = {
                             showExportMenu = false
                             onExportMonth()
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Current month (XLSX)") },
+                        onClick = {
+                            showExportMenu = false
+                            onExportMonthXlsx()
                         },
                     )
                     DropdownMenuItem(

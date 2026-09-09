@@ -46,16 +46,19 @@ kotlin {
             api(project(":core:domain"))
             api(project(":core:utils"))
             implementation(libs.kotlinx.datetime)
+            implementation(libs.kmp.zip)
         }
         val nonJsMain by getting {
             dependencies {
                 implementation(libs.kexcel)
-                implementation(libs.kmp.zip)
             }
         }
         androidMain.dependencies {
             implementation(project(":core:data"))
             implementation(libs.androidx.core.ktx)
+        }
+        wasmJsMain.dependencies {
+            implementation(libs.kotlinx.browser)
         }
     }
 }

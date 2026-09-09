@@ -1,6 +1,7 @@
 package prayit.simplebudget.feature.home.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -65,28 +66,30 @@ internal fun MonthBar(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = { showExportMenu = true }) {
-                Icon(Lucide.Download, contentDescription = "Export")
-            }
+            Box {
+                IconButton(onClick = { showExportMenu = true }) {
+                    Icon(Lucide.Download, contentDescription = "Export")
+                }
 
-            DropdownMenu(
-                expanded = showExportMenu,
-                onDismissRequest = { showExportMenu = false },
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Current month (CSV)") },
-                    onClick = {
-                        showExportMenu = false
-                        onExportMonth()
-                    },
-                )
-                DropdownMenuItem(
-                    text = { Text("Full history (XLSX)") },
-                    onClick = {
-                        showExportMenu = false
-                        onExportHistory()
-                    },
-                )
+                DropdownMenu(
+                    expanded = showExportMenu,
+                    onDismissRequest = { showExportMenu = false },
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Current month (CSV)") },
+                        onClick = {
+                            showExportMenu = false
+                            onExportMonth()
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Full history (XLSX)") },
+                        onClick = {
+                            showExportMenu = false
+                            onExportHistory()
+                        },
+                    )
+                }
             }
 
             SmallFloatingActionButton(

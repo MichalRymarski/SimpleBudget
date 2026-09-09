@@ -22,51 +22,113 @@ object CsvGenerator {
             .sumOf { it.amount }
         val difference = total - prevTotal
 
-        return buildString {
-            appendLine("Date,Title,Tag,Amount,Sum,Difference")
-            filtered.forEachIndexed { index, expense ->
-                if (index == 0) {
-                    appendLine("${expense.date},${escape(expense.title)},${expense.tag},${expense.amount},${formatCurrency(total)},${formatSigned(difference)}")
-                } else {
-                    appendLine("${expense.date},${escape(expense.title)},${expense.tag},${expense.amount},,")
-                }
-            }
-            if (filtered.isEmpty()) {
-                appendLine(",,,,${formatCurrency(total)},${formatSigned(difference)}")
+        val tagTotals = filtered
+            .groupBy { it.tag }
+            .map { (tag, items) -> tag to items.sumOf { it.amount } }
+            .sortedByDescending { it.second }
+
+        val expenseRows = mutableListOf<List<String>>()
+        filtered.forEachIndexed { index, expense ->
+            if (index == 0) {
+                expenseRows.add(listOf(
+                    expense.date.toString(),
+                    escape(expense.title),
+                    expense.tag,
+                    formatCurrency(expense.amount),
+                    formatCurrency(total),
+                    formatSigned(difference),
+                ))
+            } else {
+                expenseRows.add(listOf(
+                    expense.date.toString(),
+                    escape(expense.title),
+                    expense.tag,
+                    formatCurrency(expense.amount),
+                    "",
+                    "",
+                ))
             }
         }
+        if (filtered.isEmpty()) {
+            expenseRows.add(listOf("", "", "", "", formatCurrency(total), formatSigned(difference)))
+        }
+
+        return buildCsvWithTagSummary(expenseRows, tagTotals, total)
     }
 
     fun generateFullHistory(expenses: List<Expense>): String {
+        val allRows = mutableListOf<List<String>>()
+        var prevTotal = 0.0
+        val sortedKeys = expenses
+            .map { it.date.monthNumber to it.date.year }
+            .distinct()
+            .sortedBy { (m, y) -> y * 100 + m }
+
+        sortedKeys.forEach { (monthNum, year) ->
+            val monthExpenses = expenses
+                .filter { it.date.monthNumber == monthNum && it.date.year == year }
+                .sortedBy { it.date }
+            val total = monthExpenses.sumOf { it.amount }
+            val difference = total - prevTotal
+
+            monthExpenses.forEachIndexed { index, expense ->
+                if (index == 0) {
+                    allRows.add(listOf(
+                        expense.date.toString(),
+                        escape(expense.title),
+                        expense.tag,
+                        formatCurrency(expense.amount),
+                        formatCurrency(total),
+                        formatSigned(difference),
+                    ))
+                } else {
+                    allRows.add(listOf(
+                        expense.date.toString(),
+                        escape(expense.title),
+                        expense.tag,
+                        formatCurrency(expense.amount),
+                        "",
+                        "",
+                    ))
+                }
+            }
+            if (monthExpenses.isEmpty()) {
+                val monthName = Month.entries[monthNum - 1].stringName
+                allRows.add(listOf("$monthName $year", "", "", "", formatCurrency(total), formatSigned(difference)))
+            }
+
+            prevTotal = total
+        }
+
+        val tagTotals = expenses
+            .groupBy { it.tag }
+            .map { (tag, items) -> tag to items.sumOf { it.amount } }
+            .sortedByDescending { it.second }
+
+        return buildCsvWithTagSummary(allRows, tagTotals, expenses.sumOf { it.amount })
+    }
+
+    private fun buildCsvWithTagSummary(
+        expenseRows: List<List<String>>,
+        tagTotals: List<Pair<String, Double>>,
+        grandTotal: Double,
+    ): String {
+        val maxRows = maxOf(expenseRows.size, tagTotals.size + 1)
+
         return buildString {
-            appendLine("Date,Title,Tag,Amount,Sum,Difference")
+            appendLine("Date,Title,Tag,Amount,Sum,Difference,,Tag,SUM of Amount")
 
-            var prevTotal = 0.0
-            val sortedKeys = expenses
-                .map { it.date.monthNumber to it.date.year }
-                .distinct()
-                .sortedBy { (m, y) -> y * 100 + m }
-
-            sortedKeys.forEach { (monthNum, year) ->
-                val monthExpenses = expenses
-                    .filter { it.date.monthNumber == monthNum && it.date.year == year }
-                    .sortedBy { it.date }
-                val total = monthExpenses.sumOf { it.amount }
-                val difference = total - prevTotal
-
-                monthExpenses.forEachIndexed { index, expense ->
-                    if (index == 0) {
-                        appendLine("${expense.date},${escape(expense.title)},${expense.tag},${expense.amount},${formatCurrency(total)},${formatSigned(difference)}")
-                    } else {
-                        appendLine("${expense.date},${escape(expense.title)},${expense.tag},${expense.amount},,")
+            for (i in 0 until maxRows) {
+                val left = if (i < expenseRows.size) expenseRows[i] else listOf("", "", "", "", "", "")
+                val right = when {
+                    i < tagTotals.size -> {
+                        val (tag, total) = tagTotals[i]
+                        listOf(tag, formatCurrency(total))
                     }
+                    i == tagTotals.size -> listOf("Grand Total", formatCurrency(grandTotal))
+                    else -> listOf("", "")
                 }
-                if (monthExpenses.isEmpty()) {
-                    val monthName = Month.entries[monthNum - 1].stringName
-                    appendLine("$monthName $year,,,,${formatCurrency(total)},${formatSigned(difference)}")
-                }
-
-                prevTotal = total
+                appendLine(left.joinToString(",") + ",," + right.joinToString(","))
             }
         }
     }

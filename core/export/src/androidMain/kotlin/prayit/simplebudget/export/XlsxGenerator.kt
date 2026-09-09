@@ -15,6 +15,11 @@ actual fun generateXlsx(expenses: List<Expense>): ByteArray {
     val currencyStyle = workbook.createCellStyle().apply {
         dataFormat = workbook.createDataFormat().getFormat("#,##0.00")
     }
+    val boldCurrencyStyle = workbook.createCellStyle().apply {
+        val font = workbook.createFont().apply { bold = true }
+        setFont(font)
+        dataFormat = workbook.createDataFormat().getFormat("#,##0.00")
+    }
 
     val sortedKeys = expenses
         .map { it.date.monthNumber to it.date.year }
@@ -52,7 +57,7 @@ actual fun generateXlsx(expenses: List<Expense>): ByteArray {
         prevTotal = total
     }
 
-    // Per-month sheets
+    // Per-month sheets with tag summary at H2
     var runningPrevTotal = 0.0
     sortedKeys.forEach { (monthNum, year) ->
         val monthName = Month.entries[monthNum - 1].stringName
@@ -91,6 +96,42 @@ actual fun generateXlsx(expenses: List<Expense>): ByteArray {
                     cellStyle = currencyStyle
                 }
             }
+        }
+
+        // Tag summary at H2 (column index 7, row index 1)
+        val tagCol = 7
+        val tagHeaderRow = sheet.getRow(1) ?: sheet.createRow(1)
+        tagHeaderRow.createCell(tagCol).apply {
+            setCellValue("Tag")
+            cellStyle = headerStyle
+        }
+        tagHeaderRow.createCell(tagCol + 1).apply {
+            setCellValue("SUM of Amount")
+            cellStyle = headerStyle
+        }
+
+        val tagTotals = monthExpenses
+            .groupBy { it.tag }
+            .map { (tag, items) -> tag to items.sumOf { it.amount } }
+            .sortedByDescending { it.second }
+
+        tagTotals.forEachIndexed { index, (tag, tagTotal) ->
+            val row = sheet.getRow(index + 2) ?: sheet.createRow(index + 2)
+            row.createCell(tagCol).setCellValue(tag)
+            row.createCell(tagCol + 1).apply {
+                setCellValue(tagTotal)
+                cellStyle = currencyStyle
+            }
+        }
+
+        val grandRow = sheet.getRow(tagTotals.size + 2) ?: sheet.createRow(tagTotals.size + 2)
+        grandRow.createCell(tagCol).apply {
+            setCellValue("Grand Total")
+            cellStyle = headerStyle
+        }
+        grandRow.createCell(tagCol + 1).apply {
+            setCellValue(total)
+            cellStyle = boldCurrencyStyle
         }
 
         runningPrevTotal = total

@@ -2,6 +2,7 @@ package prayit.simplebudget.di
 
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,6 +11,7 @@ import prayit.simplebudget.core.domain.model.Expense
 import prayit.simplebudget.core.domain.repository.ExpenseRepository
 
 @ContributesBinding(AppScope::class)
+@SingleIn(AppScope::class)
 @Inject
 class InMemoryExpenseRepository : ExpenseRepository {
     private val _expenses = MutableStateFlow<List<Expense>>(emptyList())

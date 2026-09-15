@@ -1,6 +1,6 @@
 [versions]
 
-kotlin = "2.4.20"
+kotlin = "2.4.0"
 compose-multiplatform = "1.11.1"
 material3 = "1.11.0-alpha07"
 adaptive = "1.2.0"
@@ -9,19 +9,19 @@ androidx-activityCompose = "1.13.0"
 androidx-core = "1.16.0"
 napier = "2.7.1"
 kotlinx-coroutines = "1.11.0"
-ktor = "3.5.2"
+ktor = "3.5.0"
 androidx-lifecycle = "2.10.0"
 androidx-nav3 = "1.1.1"
 nav3-browser = "1.1.0"
 kotlinx-serialization = "1.11.0"
-metro = "1.4.3"
+metro = "1.2.1"
 coil = "3.5.0"
 kotlinx-datetime = "0.8.0"
-room = "2.8.5"
+room = "2.8.4"
 ksp = "2.3.9"
 compose-icons = "2.2.1"
 kexcel = "0.1.1"
-kmp-zip = "0.16.0"
+kmp-zip = "0.13.0"
 kotlinx-browser = "0.5.0"
 junit = "4.13.2"
 robolectric = "4.17"
@@ -67,7 +67,7 @@ kmp-zip = { module = "no.synth:kmp-zip", version.ref = "kmp-zip" }
 kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "kotlinx-browser" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
-room-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version = "2.7.1" }
+room-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version = "2.6.2" }
 junit = { module = "junit:junit", version.ref = "junit" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 

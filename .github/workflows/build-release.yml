@@ -43,10 +43,7 @@ jobs:
           cache: gradle
 
       - name: Set up Android SDK
-        run: |
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
-            "platform-tools" "platforms;android-36"
+        uses: android-actions/setup-android@v3
 
       - name: Decode keystore from base64
         shell: bash

@@ -1,6 +1,7 @@
 package prayit.simplebudget.feature.home.state
 
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -14,20 +15,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.todayIn
 import prayit.simplebudget.core.domain.model.Expense
 import prayit.simplebudget.core.domain.repository.ExpenseRepository
+import prayit.simplebudget.core.domain.repository.ExportRepository
 import prayit.simplebudget.core.utils.Month
-import prayit.simplebudget.export.CsvGenerator
-import prayit.simplebudget.export.generateSingleMonthXlsx
-import prayit.simplebudget.export.generateXlsx
-import prayit.simplebudget.export.shareCsvFile
-import prayit.simplebudget.export.shareXlsxFile
+import prayit.simplebudget.di.AppScope
 import kotlin.time.Clock
 
+@SingleIn(AppScope::class)
 @Inject
 class HomeViewModel(
     private val expenseRepository: ExpenseRepository,
+    private val exportRepository: ExportRepository,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
@@ -36,13 +37,16 @@ class HomeViewModel(
     private val _monthYear = MutableStateFlow(MonthYear(todayMonth, today.year))
     private val _showAddSheet = MutableStateFlow(false)
     private val _formState = MutableStateFlow(FormState())
+    private val _exportError = MutableStateFlow<String?>(null)
+    private val _notificationBanner = MutableStateFlow(false)
 
     val state: StateFlow<HomeState> = combine(
         expenseRepository.getExpenses(),
         _monthYear,
         _showAddSheet,
         _formState,
-    ) { expenses, monthYear, showAddSheet, form ->
+        _exportError,
+    ) { expenses, monthYear, showAddSheet, form, exportError ->
         val filtered = expenses
             .filter { it.date.monthNumber == monthYear.month.ordinal + 1 && it.date.year == monthYear.year }
             .map { it.toItem() }
@@ -61,7 +65,10 @@ class HomeViewModel(
             amount = form.amount,
             selectedTag = form.selectedTag,
             selectedDate = form.selectedDate,
+            exportError = exportError,
         )
+    }.combine(_notificationBanner) { state, banner ->
+        state.copy(showNotificationBanner = banner)
     }.stateIn(scope, SharingStarted.WhileSubscribed(5000), HomeState.Content())
 
     fun onPreviousMonth() {
@@ -81,10 +88,9 @@ class HomeViewModel(
     }
 
     fun onToggleAddSheet() {
-        _showAddSheet.update { !it }
-        if (_showAddSheet.value) {
-            _formState.value = FormState()
-        }
+        var opened = false
+        _showAddSheet.update { opened = !it; !it }
+        if (opened) _formState.update { FormState() }
     }
 
     fun onTitleChanged(value: String) {
@@ -121,8 +127,8 @@ class HomeViewModel(
                 )
             )
         }
-        _showAddSheet.value = false
-        _formState.value = FormState()
+        _showAddSheet.update { false }
+        _formState.update { FormState() }
     }
 
     fun removeExpense(id: String) {
@@ -135,10 +141,8 @@ class HomeViewModel(
         scope.launch {
             val allExpenses = expenseRepository.getExpenses().first()
             val my = _monthYear.value
-            val csv = CsvGenerator.generateSingleMonth(allExpenses, my.month, my.year)
-            val monthNum = (my.month.ordinal + 1).toString().padStart(2, '0')
-            val fileName = "Budget-$monthNum.${my.year}.csv"
-            shareCsvFile(fileName, csv, "Budget-$monthNum.${my.year}")
+            exportRepository.exportMonthCsv(allExpenses, my.month.ordinal + 1, my.year)
+                .onFailure(::showExportError)
         }
     }
 
@@ -146,18 +150,37 @@ class HomeViewModel(
         scope.launch {
             val allExpenses = expenseRepository.getExpenses().first()
             val my = _monthYear.value
-            val xlsx = generateSingleMonthXlsx(allExpenses, my.month, my.year)
-            val monthNum = (my.month.ordinal + 1).toString().padStart(2, '0')
-            shareXlsxFile("Budget-$monthNum.${my.year}.xlsx", xlsx, "Budget-$monthNum.${my.year}")
+            exportRepository.exportMonthXlsx(allExpenses, my.month.ordinal + 1, my.year)
+                .onFailure(::showExportError)
         }
     }
 
     fun onExportHistory() {
         scope.launch {
             val allExpenses = expenseRepository.getExpenses().first()
-            val xlsx = generateXlsx(allExpenses)
-            shareXlsxFile("Budget-history.xlsx", xlsx, "Budget history")
+            exportRepository.exportHistoryXlsx(allExpenses)
+                .onFailure(::showExportError)
         }
+    }
+
+    fun onExportErrorDismiss() {
+        _exportError.update { null }
+    }
+
+    fun refreshNotificationBanner() {
+        _notificationBanner.update { exportRepository.supportsAutoCapture() && !exportRepository.isAutoCaptureEnabled() }
+    }
+
+    fun onNotificationBannerDismiss() {
+        _notificationBanner.update { false }
+    }
+
+    fun openNotificationSettings() {
+        exportRepository.openAutoCaptureSettings()
+    }
+
+    private fun showExportError(throwable: Throwable) {
+        _exportError.update { throwable.message ?: "Export failed" }
     }
 }
 
@@ -175,11 +198,11 @@ private fun Expense.toItem() = ExpenseItem(
     title = title,
     amount = amount,
     date = date,
-    tag = FinancialTag.entries.first { it.name == tag },
+    tag = FinancialTag.entries.firstOrNull { it.name == tag } ?: FinancialTag.Misc,
 )
 
 private fun List<Expense>.totalForMonth(month: Month, year: Int): Double =
-    filter { it.date.monthNumber == month.ordinal + 1 && it.date.year == year }
+    filter { it.date.month.number == month.ordinal + 1 && it.date.year == year }
         .sumOf { it.amount }
 
 private fun Month.previous(): Month {

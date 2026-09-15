@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,27 +16,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import kotlinx.datetime.LocalDate
+import prayit.simplebudget.core.components.theme.LocalAppSpacing
+import prayit.simplebudget.core.components.theme.MParafiaTheme
+import prayit.simplebudget.core.utils.PhonePreviews
 import prayit.simplebudget.feature.home.state.ExpenseItem
+import prayit.simplebudget.feature.home.state.FinancialTag
 
 @Composable
 internal fun ExpenseItemRow(
     item: ExpenseItem,
     onClick: () -> Unit = {},
 ) {
+    val spacing = LocalAppSpacing.current
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .padding(12.dp),
+            .padding(spacing.md),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(MaterialTheme.shapes.small)
                 .background(item.tag.color.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center,
         ) {
@@ -62,10 +68,26 @@ internal fun ExpenseItemRow(
                 style = MaterialTheme.typography.bodyLarge,
             )
             Text(
-                text = padZero(item.date.dayOfMonth),
+                text = padZero(item.date.day),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+    }
+}
+
+@PhonePreviews
+@Composable
+private fun ExpenseItemRowPreview() {
+    MParafiaTheme {
+        ExpenseItemRow(
+            item = ExpenseItem(
+                id = "1",
+                title = "Groceries",
+                amount = 45.99,
+                date = LocalDate(2026, 1, 3),
+                tag = FinancialTag.Groceries,
+            ),
+        )
     }
 }

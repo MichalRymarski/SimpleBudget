@@ -17,16 +17,22 @@ private fun download(fileName: String, mime: String, dataUrl: String) {
 }
 
 @OptIn(ExperimentalEncodingApi::class)
-actual fun shareCsvFile(fileName: String, csvContent: String, subject: String) {
-    val bytes = csvContent.encodeToByteArray()
-    download(fileName, "text/csv", "data:text/csv;base64,${Base64.encode(bytes)}")
-}
+actual fun shareCsvFile(fileName: String, csvContent: String, subject: String): Result<Unit> =
+    runCatching {
+        val bytes = csvContent.encodeToByteArray()
+        download(fileName, "text/csv", "data:text/csv;base64,${Base64.encode(bytes)}")
+    }
 
 @OptIn(ExperimentalEncodingApi::class)
-actual fun shareXlsxFile(fileName: String, byteArray: ByteArray, subject: String) {
-    download(
-        fileName,
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${Base64.encode(byteArray)}",
-    )
-}
+actual fun shareXlsxFile(fileName: String, byteArray: ByteArray, subject: String): Result<Unit> =
+    runCatching {
+        download(
+            fileName,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${
+                Base64.encode(
+                    byteArray
+                )
+            }",
+        )
+    }

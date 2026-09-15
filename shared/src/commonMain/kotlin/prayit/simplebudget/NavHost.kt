@@ -15,9 +15,9 @@ import prayit.simplebudget.navigation.rememberDeviceClass
 
 @Composable
 fun NavHost(
-    isDark: Boolean? = null,
     darkThemeToggle: @Composable (() -> Unit)? = null,
     onThemeChanged: @Composable ((isDark: Boolean) -> Unit) = {},
+    isDark: Boolean? = null,
 ) {
     val backStack = rememberNavBackStack(navConfig, HomeRoute.Main)
     val deviceClass = rememberDeviceClass()

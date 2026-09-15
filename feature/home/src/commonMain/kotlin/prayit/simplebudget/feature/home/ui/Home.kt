@@ -10,12 +10,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import prayit.simplebudget.core.components.navigation.BaseScreen
+import prayit.simplebudget.core.components.theme.LocalAppSpacing
 import prayit.simplebudget.core.components.theme.MParafiaTheme
 import prayit.simplebudget.core.utils.DeviceClass
 import prayit.simplebudget.core.utils.Month
@@ -34,6 +38,14 @@ fun HomeScreen(
     onExpenseClick: (id: String) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshNotificationBanner()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     HomeContent(
         state = state,
@@ -51,6 +63,9 @@ fun HomeScreen(
         onDateSelected = viewModel::onDateSelected,
         onConfirmAdd = viewModel::onConfirmAdd,
         onExpenseClick = onExpenseClick,
+        onExportErrorDismiss = viewModel::onExportErrorDismiss,
+        onNotificationBannerDismiss = viewModel::onNotificationBannerDismiss,
+        onOpenNotificationSettings = viewModel::openNotificationSettings,
     )
 }
 
@@ -72,6 +87,9 @@ fun HomeContent(
     onDateSelected: (kotlinx.datetime.LocalDate) -> Unit = {},
     onConfirmAdd: () -> Unit = {},
     onExpenseClick: (id: String) -> Unit = {},
+    onExportErrorDismiss: () -> Unit = {},
+    onNotificationBannerDismiss: () -> Unit = {},
+    onOpenNotificationSettings: () -> Unit = {},
 ) {
     val content = state as? HomeState.Content ?: return
 
@@ -90,6 +108,8 @@ fun HomeContent(
         )
     }
 
+    val spacing = LocalAppSpacing.current
+
     BaseScreen(
         deviceClass = deviceClass,
         items = emptyList(),
@@ -97,12 +117,26 @@ fun HomeContent(
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(spacing.md),
         ) {
             TotalsRow(
                 totalSpent = content.totalSpent,
                 previousMonthTotal = content.previousMonthTotal,
             )
+
+            if (content.exportError != null) {
+                ExportErrorBanner(
+                    message = content.exportError,
+                    onDismiss = onExportErrorDismiss,
+                )
+            }
+
+            if (content.showNotificationBanner) {
+                NotificationCaptureBanner(
+                    onOpenSettings = onOpenNotificationSettings,
+                    onDismiss = onNotificationBannerDismiss,
+                )
+            }
 
             val listState = rememberLazyListState()
 
@@ -117,7 +151,7 @@ fun HomeContent(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(spacing.sm),
             ) {
                 items(content.items, key = { it.id }) { item ->
                     ExpenseItemRow(
@@ -130,6 +164,7 @@ fun HomeContent(
             MonthBar(
                 month = content.currentMonth,
                 year = content.currentYear,
+                deviceClass = deviceClass,
                 onPreviousMonth = onPreviousMonth,
                 onNextMonth = onNextMonth,
                 onAddClick = onAddClick,

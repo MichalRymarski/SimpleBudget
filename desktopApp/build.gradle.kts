@@ -15,7 +15,7 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "MParafia"
+            packageName = "SimpleBudget"
             packageVersion = "1.0.0"
 
             linux {

@@ -3,7 +3,8 @@ package prayit.simplebudget.export
 import java.awt.Desktop
 import java.io.File
 
-actual fun shareCsvFile(fileName: String, csvContent: String, subject: String) {
+actual fun shareCsvFile(fileName: String, csvContent: String, subject: String): Result<Unit> =
+    runCatching {
     val tempDir = System.getProperty("java.io.tmpdir") ?: "/tmp"
     val file = File(tempDir, fileName)
     file.writeText(csvContent)
@@ -13,7 +14,8 @@ actual fun shareCsvFile(fileName: String, csvContent: String, subject: String) {
     }
 }
 
-actual fun shareXlsxFile(fileName: String, byteArray: ByteArray, subject: String) {
+actual fun shareXlsxFile(fileName: String, byteArray: ByteArray, subject: String): Result<Unit> =
+    runCatching {
     val tempDir = System.getProperty("java.io.tmpdir") ?: "/tmp"
     val file = File(tempDir, fileName)
     file.writeBytes(byteArray)

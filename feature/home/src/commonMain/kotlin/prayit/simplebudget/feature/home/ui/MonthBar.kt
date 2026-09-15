@@ -10,7 +10,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,18 +18,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.composables.icons.lucide.ChevronLeft
 import com.composables.icons.lucide.ChevronRight
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Plus
 import com.composables.icons.lucide.Share
+import org.jetbrains.compose.resources.stringResource
+import prayit.simplebudget.core.components.button.fab.AppFloatingActionButton
+import prayit.simplebudget.core.components.theme.LocalAppSpacing
+import prayit.simplebudget.core.components.theme.MParafiaTheme
+import prayit.simplebudget.core.utils.DeviceClass
 import prayit.simplebudget.core.utils.Month
+import prayit.simplebudget.core.utils.PhonePreviews
+import simplebudget.core.resources.generated.resources.Res
+import simplebudget.core.resources.generated.resources.home_add_expense
+import simplebudget.core.resources.generated.resources.home_export_content_description
+import simplebudget.core.resources.generated.resources.home_export_history_xlsx
+import simplebudget.core.resources.generated.resources.home_export_month_csv
+import simplebudget.core.resources.generated.resources.home_export_month_xlsx
+import simplebudget.core.resources.generated.resources.home_next_month
+import simplebudget.core.resources.generated.resources.home_previous_month
 
 @Composable
 internal fun MonthBar(
     month: Month,
     year: Int,
+    deviceClass: DeviceClass = DeviceClass.PhonePortrait,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
     onAddClick: () -> Unit,
@@ -39,37 +52,47 @@ internal fun MonthBar(
     onExportHistory: () -> Unit = {},
 ) {
     var showExportMenu by remember { mutableStateOf(false) }
+    val spacing = LocalAppSpacing.current
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp),
+            .padding(top = spacing.md),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onPreviousMonth) {
-                Icon(Lucide.ChevronLeft, contentDescription = "Previous month")
+                Icon(
+                    Lucide.ChevronLeft,
+                    contentDescription = stringResource(Res.string.home_previous_month)
+                )
             }
             Text(
                 text = "${month.stringName} $year",
                 style = MaterialTheme.typography.titleMedium,
             )
             IconButton(onClick = onNextMonth) {
-                Icon(Lucide.ChevronRight, contentDescription = "Next month")
+                Icon(
+                    Lucide.ChevronRight,
+                    contentDescription = stringResource(Res.string.home_next_month)
+                )
             }
         }
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box {
                 IconButton(onClick = { showExportMenu = true }) {
-                    Icon(Lucide.Share, contentDescription = "Export")
+                    Icon(
+                        Lucide.Share,
+                        contentDescription = stringResource(Res.string.home_export_content_description)
+                    )
                 }
 
                 DropdownMenu(
@@ -77,21 +100,21 @@ internal fun MonthBar(
                     onDismissRequest = { showExportMenu = false },
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Current month (CSV)") },
+                        text = { Text(stringResource(Res.string.home_export_month_csv)) },
                         onClick = {
                             showExportMenu = false
                             onExportMonth()
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text("Current month (XLSX)") },
+                        text = { Text(stringResource(Res.string.home_export_month_xlsx)) },
                         onClick = {
                             showExportMenu = false
                             onExportMonthXlsx()
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text("Full history (XLSX)") },
+                        text = { Text(stringResource(Res.string.home_export_history_xlsx)) },
                         onClick = {
                             showExportMenu = false
                             onExportHistory()
@@ -100,13 +123,26 @@ internal fun MonthBar(
                 }
             }
 
-            SmallFloatingActionButton(
+            AppFloatingActionButton(
+                deviceClass = deviceClass,
                 onClick = onAddClick,
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ) {
-                Icon(Lucide.Plus, contentDescription = "Add expense")
+                Icon(Lucide.Plus, contentDescription = stringResource(Res.string.home_add_expense))
             }
         }
+    }
+}
+
+@PhonePreviews
+@Composable
+private fun MonthBarPreview() {
+    MParafiaTheme {
+        MonthBar(
+            month = Month.January,
+            year = 2026,
+            onPreviousMonth = {},
+            onNextMonth = {},
+            onAddClick = {},
+        )
     }
 }

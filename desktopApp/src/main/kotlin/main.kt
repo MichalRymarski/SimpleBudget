@@ -12,8 +12,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import java.awt.Dimension
 import prayit.simplebudget.App
+import java.awt.Dimension
 
 fun main() = application {
     val sharedIsDark = mutableStateOf(true)
@@ -36,7 +36,7 @@ fun main() = application {
             )
         }
     }
-    /*Window(
+    Window(
         title = "SimpleBudget — Tablet",
         state = rememberWindowState(width = 1024.dp, height = 768.dp),
         onCloseRequest = ::exitApplication,
@@ -53,7 +53,7 @@ fun main() = application {
                 },
             )
         }
-    }*/
+    }
 }
 
 @Composable

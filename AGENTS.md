@@ -15,7 +15,8 @@ Each `expect` variable/function/class should have an `actual` representation in 
 - `core:utils` — Preview annotations, Log wrapper, extensions
 - `core:resources` — Compose Multiplatform resources (strings, fonts, drawables). **Must be included in every module** that uses `Res` (strings, fonts, etc.) — feature modules, core:components, shared. Uses `publicResClass = true`.
 - `core:components` — Theme, base Compose UI components
-- `core:domain` — Repository interfaces, domain models. No implementation details. Depends on nothing except `kotlinx.coroutines`.
+- `core:domain` — Repository interfaces, domain models. No implementation details. Depends on
+  `kotlinx.coroutines` (+ `kotlinx.datetime` for `LocalDate` in models).
 - `core:data` — Room database, DAOs, entities, repository implementations. Depends on `core:domain` and `core:utils` (for `AppScope`). Uses `@ContributesBinding` to bind repo implementations.
 - `feature:y` — singular screens / specific functionality (e.g., `feature:home`). Depends only on `core:domain` for repo interfaces.
 

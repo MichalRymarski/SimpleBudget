@@ -5,8 +5,9 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import java.io.File
 
-actual fun shareCsvFile(fileName: String, csvContent: String, subject: String) {
-    val context: Context = prayit.simplebudget.core.data.dbSetup.AppContext.instance
+actual fun shareCsvFile(fileName: String, csvContent: String, subject: String): Result<Unit> =
+    runCatching {
+        val context: Context = prayit.simplebudget.core.utils.AppContext.requireInstance()
     val cacheDir = File(context.cacheDir, "exports")
     cacheDir.mkdirs()
     val file = File(cacheDir, fileName)
@@ -29,8 +30,9 @@ actual fun shareCsvFile(fileName: String, csvContent: String, subject: String) {
     })
 }
 
-actual fun shareXlsxFile(fileName: String, byteArray: ByteArray, subject: String) {
-    val context: Context = prayit.simplebudget.core.data.dbSetup.AppContext.instance
+actual fun shareXlsxFile(fileName: String, byteArray: ByteArray, subject: String): Result<Unit> =
+    runCatching {
+        val context: Context = prayit.simplebudget.core.utils.AppContext.requireInstance()
     val cacheDir = File(context.cacheDir, "exports")
     cacheDir.mkdirs()
     val file = File(cacheDir, fileName)

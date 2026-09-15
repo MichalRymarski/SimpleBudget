@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -28,13 +27,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
+import prayit.simplebudget.core.components.theme.LocalAppSpacing
+import prayit.simplebudget.core.components.theme.MParafiaTheme
+import prayit.simplebudget.core.utils.PhonePreviews
 import prayit.simplebudget.feature.home.state.FinancialTag
+import simplebudget.core.resources.generated.resources.Res
+import simplebudget.core.resources.generated.resources.home_add_button
+import simplebudget.core.resources.generated.resources.home_add_expense_title
+import simplebudget.core.resources.generated.resources.home_dialog_cancel
+import simplebudget.core.resources.generated.resources.home_dialog_ok
+import simplebudget.core.resources.generated.resources.home_expense_amount_label
+import simplebudget.core.resources.generated.resources.home_expense_tag_label
+import simplebudget.core.resources.generated.resources.home_expense_title_label
+import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,12 +78,12 @@ internal fun AddExpenseSheet(
                     }
                     showDatePicker = false
                 }) {
-                    Text("OK")
+                    Text(stringResource(Res.string.home_dialog_ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
+                    Text(stringResource(Res.string.home_dialog_cancel))
                 }
             },
         ) {
@@ -81,6 +92,7 @@ internal fun AddExpenseSheet(
     }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val spacing = LocalAppSpacing.current
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -89,19 +101,19 @@ internal fun AddExpenseSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(horizontal = spacing.lg)
+                .padding(bottom = spacing.xl),
+            verticalArrangement = Arrangement.spacedBy(spacing.md),
         ) {
             Text(
-                text = "Add Expense",
+                text = stringResource(Res.string.home_add_expense_title),
                 style = MaterialTheme.typography.titleLarge,
             )
 
             OutlinedTextField(
                 value = title,
                 onValueChange = onTitleChanged,
-                label = { Text("Title") },
+                label = { Text(stringResource(Res.string.home_expense_title_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -109,7 +121,7 @@ internal fun AddExpenseSheet(
             OutlinedTextField(
                 value = amount,
                 onValueChange = onAmountChanged,
-                label = { Text("Amount") },
+                label = { Text(stringResource(Res.string.home_expense_amount_label)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 prefix = { Text("$ ") },
@@ -117,13 +129,13 @@ internal fun AddExpenseSheet(
             )
 
             Text(
-                text = "Tag",
+                text = stringResource(Res.string.home_expense_tag_label),
                 style = MaterialTheme.typography.labelLarge,
             )
 
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(spacing.sm),
             ) {
                 FinancialTag.entries.forEach { tag ->
                     TagChip(
@@ -140,31 +152,53 @@ internal fun AddExpenseSheet(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel")
+                    Text(stringResource(Res.string.home_dialog_cancel))
                 }
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(spacing.sm),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = formatDate(selectedDate.dayOfMonth, selectedDate.monthNumber, selectedDate.year),
+                        text = formatDate(
+                            selectedDate.day,
+                            selectedDate.month.number, selectedDate.year
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(MaterialTheme.shapes.small)
                             .clickable { showDatePicker = true }
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                            .padding(horizontal = spacing.md, vertical = spacing.sm),
                     )
 
                     TextButton(
                         onClick = onConfirmAdd,
                         enabled = title.isNotBlank() && amount.toDoubleOrNull() != null && (amount.toDoubleOrNull() ?: 0.0) > 0.0,
                     ) {
-                        Text("Add")
+                        Text(stringResource(Res.string.home_add_button))
                     }
                 }
             }
         }
+    }
+}
+
+@PhonePreviews
+@Composable
+private fun AddExpenseSheetPreview() {
+    MParafiaTheme {
+        AddExpenseSheet(
+            title = "Groceries",
+            amount = "45.99",
+            selectedTag = FinancialTag.Groceries,
+            selectedDate = LocalDate(2026, 1, 3),
+            onTitleChanged = {},
+            onAmountChanged = {},
+            onTagSelected = {},
+            onDateSelected = {},
+            onConfirmAdd = {},
+            onDismiss = {},
+        )
     }
 }

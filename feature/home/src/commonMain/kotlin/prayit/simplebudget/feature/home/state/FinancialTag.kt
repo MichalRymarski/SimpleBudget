@@ -11,6 +11,9 @@ import com.composables.icons.lucide.Monitor
 import com.composables.icons.lucide.Sparkles
 import com.composables.icons.lucide.UtensilsCrossed
 import com.composables.icons.lucide.Zap
+import org.jetbrains.compose.resources.stringResource
+import simplebudget.core.resources.generated.resources.Res
+import simplebudget.core.resources.generated.resources.missing_accessibility
 
 enum class FinancialTag(
     val color: Color,
@@ -18,30 +21,65 @@ enum class FinancialTag(
 ) {
     Groceries(
         color = Color(0xFF4CAF50),
-        icon = { Icon(Lucide.Apple, contentDescription = null) },
+        icon = {
+            Icon(
+                Lucide.Apple,
+                contentDescription = stringResource(Res.string.missing_accessibility)
+            )
+        },
     ),
     EatingOut(
         color = Color(0xFFFF9800),
-        icon = { Icon(Lucide.UtensilsCrossed, contentDescription = null) },
+        icon = {
+            Icon(
+                Lucide.UtensilsCrossed,
+                contentDescription = stringResource(Res.string.missing_accessibility)
+            )
+        },
     ),
     Health(
         color = Color(0xFFE91E63),
-        icon = { Icon(Lucide.Heart, contentDescription = null) },
+        icon = {
+            Icon(
+                Lucide.Heart,
+                contentDescription = stringResource(Res.string.missing_accessibility)
+            )
+        },
     ),
     Bills(
         color = Color(0xFF2196F3),
-        icon = { Icon(Lucide.Zap, contentDescription = null) },
+        icon = {
+            Icon(
+                Lucide.Zap,
+                contentDescription = stringResource(Res.string.missing_accessibility)
+            )
+        },
     ),
     Cosmetics(
         color = Color(0xFF9C27B0),
-        icon = { Icon(Lucide.Sparkles, contentDescription = null) },
+        icon = {
+            Icon(
+                Lucide.Sparkles,
+                contentDescription = stringResource(Res.string.missing_accessibility)
+            )
+        },
     ),
     Technology(
         color = Color(0xFF00BCD4),
-        icon = { Icon(Lucide.Monitor, contentDescription = null) },
+        icon = {
+            Icon(
+                Lucide.Monitor,
+                contentDescription = stringResource(Res.string.missing_accessibility)
+            )
+        },
     ),
     Misc(
         color = Color(0xFF9E9E9E),
-        icon = { Icon(Lucide.Ellipsis, contentDescription = null) },
+        icon = {
+            Icon(
+                Lucide.Ellipsis,
+                contentDescription = stringResource(Res.string.missing_accessibility)
+            )
+        },
     ),
 }

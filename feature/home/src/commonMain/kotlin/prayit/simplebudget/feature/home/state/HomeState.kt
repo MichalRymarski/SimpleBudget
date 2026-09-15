@@ -2,6 +2,7 @@ package prayit.simplebudget.feature.home.state
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.todayIn
 import prayit.simplebudget.core.utils.Month
 import kotlin.time.Clock
@@ -11,7 +12,7 @@ private val today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefaul
 sealed interface HomeState {
     data object Loading : HomeState
     data class Content(
-        val currentMonth: Month = Month.entries[today.monthNumber - 1],
+        val currentMonth: Month = Month.entries[today.month.number - 1],
         val currentYear: Int = today.year,
         val items: List<ExpenseItem> = emptyList(),
         val totalSpent: Double = 0.0,
@@ -21,6 +22,8 @@ sealed interface HomeState {
         val amount: String = "",
         val selectedTag: FinancialTag = FinancialTag.Misc,
         val selectedDate: LocalDate = today,
+        val exportError: String? = null,
+        val showNotificationBanner: Boolean = false,
     ) : HomeState
     data class Error(val message: String) : HomeState
 }

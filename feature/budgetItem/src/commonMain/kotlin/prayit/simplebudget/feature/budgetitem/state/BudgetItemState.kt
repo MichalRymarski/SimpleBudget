@@ -13,7 +13,10 @@ sealed interface BudgetItemState {
         val tag: String = "",
         val editTitle: String = title,
         val editAmount: String = "",
+        val editTag: ExpenseTag = ExpenseTag.Misc,
         val hasChanges: Boolean = false,
+        val showDeleteDialog: Boolean = false,
+        val isDeleted: Boolean = false,
     ) : BudgetItemState
 
     data object NotFound : BudgetItemState

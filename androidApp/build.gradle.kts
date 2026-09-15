@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.compose.compiler)
@@ -11,7 +12,7 @@ android {
 
     defaultConfig {
         minSdk = project.property("ANDROID_MIN_SDK").toString().toInt()
-        targetSdk = 36
+        targetSdk = project.property("ANDROID_TARGET_SDK").toString().toInt()
 
         applicationId = "prayit.simplebudget.androidApp"
         versionCode = 1
@@ -20,10 +21,21 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = rootProject.file("release-key.jks")
-            storePassword = "simplebudget123"
-            keyAlias = "simplebudget"
-            keyPassword = "simplebudget123"
+            // Secrets come from local.properties or env (RELEASE_STORE_FILE etc.).
+            // Never commit them — see README. Missing values fail only when signing.
+            val localProps = Properties().apply {
+                rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()
+                    ?.use { load(it) }
+            }
+
+            fun secret(name: String): String? =
+                System.getenv(name) ?: localProps.getProperty(name)
+                ?: project.findProperty(name) as? String
+            storeFile =
+                secret("RELEASE_STORE_FILE")?.let(::file) ?: rootProject.file("release-key.jks")
+            storePassword = secret("RELEASE_STORE_PASSWORD")
+            keyAlias = secret("RELEASE_KEY_ALIAS")
+            keyPassword = secret("RELEASE_KEY_PASSWORD")
         }
     }
 
@@ -37,6 +49,10 @@ android {
             )
             signingConfig = signingConfigs.getByName("release")
         }
+    }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
     }
 
     bundle {
@@ -69,5 +85,11 @@ kotlin {
 
 dependencies {
     implementation(project(":shared"))
+    implementation(project(":core:export"))
     implementation(libs.androidx.activityCompose)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.datetime)
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(kotlin("test"))
 }

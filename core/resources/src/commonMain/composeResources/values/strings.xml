@@ -1,14 +1,35 @@
 <resources>
     <!-- Home -->
-    <string name="home_parishes_title">Parishes</string>
-    <string name="home_parishes_subtitle">Click a parish to enter</string>
-    <string name="home_bible_title">Bible</string>
-    <string name="home_profile_title">Profile</string>
-    <string name="home_fab_content_description">Quick actions</string>
-    <string name="home_bottom_sheet_title">Quick Actions</string>
-    <string name="home_bottom_sheet_join_parish">Join Parish</string>
-    <string name="home_bottom_sheet_create_parish">Create Parish</string>
-    <string name="home_bottom_sheet_scan_qr">Scan QR Code</string>
+    <string name="home_spent_label">Spent</string>
+    <string name="home_vs_last_month">vs last month</string>
+    <string name="home_previous_month">Previous month</string>
+    <string name="home_next_month">Next month</string>
+    <string name="home_export_content_description">Export</string>
+    <string name="home_export_month_csv">Current month (CSV)</string>
+    <string name="home_export_month_xlsx">Current month (XLSX)</string>
+    <string name="home_export_history_xlsx">Full history (XLSX)</string>
+    <string name="home_add_expense">Add expense</string>
+    <string name="home_add_expense_title">Add Expense</string>
+    <string name="home_expense_title_label">Title</string>
+    <string name="home_expense_amount_label">Amount</string>
+    <string name="home_expense_tag_label">Tag</string>
+    <string name="home_dialog_ok">OK</string>
+    <string name="home_dialog_cancel">Cancel</string>
+    <string name="home_add_button">Add</string>
+    <string name="home_export_error_dismiss">Dismiss</string>
+    <string name="home_notification_message">Auto-capture is off. Enable notification access to log Wallet and Revolut payments automatically. You can revoke it anytime in system settings.</string>
+    <string name="home_notification_open_settings">Open settings</string>
+    <string name="home_notification_dismiss">Not now</string>
+
+    <!-- Budget item -->
+    <string name="budgetitem_back">Back</string>
+    <string name="budgetitem_delete">Delete</string>
+    <string name="budgetitem_delete_title">Delete expense</string>
+    <string name="budgetitem_cancel">Cancel</string>
+    <string name="budgetitem_save_changes">Save changes</string>
+    <string name="budgetitem_loading">Loading...</string>
+    <string name="budgetitem_not_found">Expense not found</string>
+    <string name="budgetitem_tag_label">Tag</string>
 
     <!-- Accessibility -->
     <string name="missing_accessibility">Missing accessibility</string>

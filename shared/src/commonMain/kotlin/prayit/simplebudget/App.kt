@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun App(
-    isDark: Boolean? = null,
     darkThemeToggle: @Composable (() -> Unit)? = null,
     onThemeChanged: @Composable ((isDark: Boolean) -> Unit) = {},
+    isDark: Boolean? = null,
 ) {
     NavHost(
         isDark = isDark,

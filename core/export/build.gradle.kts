@@ -1,4 +1,7 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -32,7 +35,9 @@ kotlin {
     applyDefaultHierarchyTemplate {
         common {
             group("nonJs") {
-                withAndroidTarget()
+                // NB: withAndroidTarget() is intentionally NOT used here — KGP silently
+                // ignores it inside custom groups, leaving androidMain wired straight to
+                // commonMain (see dumpHierarchy). The edge is added explicitly below.
                 withJvm()
                 group("ios") {
                     withIos()
@@ -53,12 +58,17 @@ kotlin {
                 implementation(libs.kexcel)
             }
         }
+        androidMain {
+            dependsOn(nonJsMain)
+        }
         androidMain.dependencies {
-            implementation(project(":core:data"))
             implementation(libs.androidx.core.ktx)
         }
         wasmJsMain.dependencies {
             implementation(libs.kotlinx.browser)
+        }
+        jvmTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
 }

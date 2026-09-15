@@ -1,4 +1,7 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
@@ -36,7 +39,8 @@ kotlin {
     applyDefaultHierarchyTemplate {
         common {
             group("nonJs") {
-                withAndroidTarget()
+                // NB: withAndroidTarget() is intentionally NOT used here — KGP silently
+                // ignores it inside custom groups (see core:export). Edge added explicitly.
                 withJvm()
                 group("ios") {
                     withIos()
@@ -51,7 +55,6 @@ kotlin {
             api(project(":core:resources"))
             api(project(":core:components"))
             api(project(":core:domain"))
-            api(project(":core:data"))
             api(project(":core:export"))
             api(project(":feature:home"))
             api(project(":feature:budgetItem"))
@@ -84,6 +87,15 @@ kotlin {
             implementation(kotlin("test"))
             implementation(libs.compose.ui.test)
             implementation(libs.kotlinx.coroutines.test)
+        }
+
+        val nonJsMain by getting {
+            dependencies {
+                api(project(":core:data"))
+            }
+        }
+        androidMain {
+            dependsOn(nonJsMain)
         }
 
         androidMain.dependencies {

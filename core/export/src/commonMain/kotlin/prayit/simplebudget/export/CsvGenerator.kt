@@ -1,5 +1,6 @@
 package prayit.simplebudget.export
 
+import kotlinx.datetime.number
 import prayit.simplebudget.core.domain.model.Expense
 import prayit.simplebudget.core.utils.Month
 
@@ -11,14 +12,14 @@ object CsvGenerator {
         year: Int,
     ): String {
         val filtered = expenses
-            .filter { it.date.monthNumber == month.ordinal + 1 && it.date.year == year }
+            .filter { it.date.month.number == month.ordinal + 1 && it.date.year == year }
             .sortedBy { it.date }
 
         val total = filtered.sumOf { it.amount }
         val prevMonth = month.previous()
         val prevYear = if (month == Month.January) year - 1 else year
         val prevTotal = expenses
-            .filter { it.date.monthNumber == prevMonth.ordinal + 1 && it.date.year == prevYear }
+            .filter { it.date.month.number == prevMonth.ordinal + 1 && it.date.year == prevYear }
             .sumOf { it.amount }
         val difference = total - prevTotal
 
@@ -60,13 +61,13 @@ object CsvGenerator {
         val allRows = mutableListOf<List<String>>()
         var prevTotal = 0.0
         val sortedKeys = expenses
-            .map { it.date.monthNumber to it.date.year }
+            .map { it.date.month.number to it.date.year }
             .distinct()
             .sortedBy { (m, y) -> y * 100 + m }
 
         sortedKeys.forEach { (monthNum, year) ->
             val monthExpenses = expenses
-                .filter { it.date.monthNumber == monthNum && it.date.year == year }
+                .filter { it.date.month.number == monthNum && it.date.year == year }
                 .sortedBy { it.date }
             val total = monthExpenses.sumOf { it.amount }
             val difference = total - prevTotal
@@ -142,9 +143,10 @@ object CsvGenerator {
     }
 
     private fun formatCurrency(value: Double): String {
-        val whole = value.toLong()
-        val fraction = ((value - whole) * 100).toInt().let { if (it < 10) "0$it" else "$it" }
-        return "$whole.$fraction"
+        val totalCents = kotlin.math.round(value * 100).toLong()
+        val sign = if (totalCents < 0) "-" else ""
+        val absCents = kotlin.math.abs(totalCents)
+        return "$sign${absCents / 100}.${(absCents % 100).toString().padStart(2, '0')}"
     }
 
     private fun formatSigned(value: Double): String {

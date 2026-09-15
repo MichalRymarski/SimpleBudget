@@ -7,10 +7,11 @@ import com.gyanoba.kexcel.sheet.CellStyle
 import com.gyanoba.kexcel.sheet.DateCellValue
 import com.gyanoba.kexcel.sheet.DoubleCellValue
 import com.gyanoba.kexcel.sheet.TextCellValue
+import kotlinx.datetime.number
 import prayit.simplebudget.core.domain.model.Expense
 import prayit.simplebudget.core.utils.Month
 
-actual fun generateXlsx(expenses: List<Expense>): ByteArray {
+actual fun generateXlsx(expenses: List<Expense>): Result<ByteArray> = runCatching {
     val excel = Excel.createExcel()
     val headerStyle = CellStyle(bold = true)
     val currencyStyle = CellStyle(numberFormat = NumFormat.standard_4)
@@ -18,7 +19,7 @@ actual fun generateXlsx(expenses: List<Expense>): ByteArray {
     val dateStyle = CellStyle(numberFormat = NumFormat.custom("dd-mm-yyyy"))
 
     val sortedKeys = expenses
-        .map { it.date.monthNumber to it.date.year }
+        .map { it.date.month.number to it.date.year }
         .distinct()
         .sortedBy { (m, y) -> y * 100 + m }
 
@@ -30,7 +31,7 @@ actual fun generateXlsx(expenses: List<Expense>): ByteArray {
     var prevTotal = 0.0
     sortedKeys.forEachIndexed { rowIndex, (monthNum, year) ->
         val monthExpenses = expenses
-            .filter { it.date.monthNumber == monthNum && it.date.year == year }
+            .filter { it.date.month.number == monthNum && it.date.year == year }
         val total = monthExpenses.sumOf { it.amount }
         val difference = total - prevTotal
         val row = rowIndex + 1
@@ -49,7 +50,7 @@ actual fun generateXlsx(expenses: List<Expense>): ByteArray {
         }
 
         val monthExpenses = expenses
-            .filter { it.date.monthNumber == monthNum && it.date.year == year }
+            .filter { it.date.month.number == monthNum && it.date.year == year }
             .sortedBy { it.date }
         val total = monthExpenses.sumOf { it.amount }
         val difference = total - runningPrevTotal
@@ -90,10 +91,16 @@ actual fun generateXlsx(expenses: List<Expense>): ByteArray {
 
     excel.delete("Sheet1")
     excel.setDefaultSheet("Summary")
-    return withAutoFilter(excel.encode() ?: error("Failed to encode workbook"))
+    val bytes =
+        excel.encode() ?: return Result.failure(IllegalStateException("Failed to encode workbook"))
+    withAutoFilter(bytes)
 }
 
-actual fun generateSingleMonthXlsx(expenses: List<Expense>, month: Month, year: Int): ByteArray {
+actual fun generateSingleMonthXlsx(
+    expenses: List<Expense>,
+    month: Month,
+    year: Int,
+): Result<ByteArray> = runCatching {
     val excel = Excel.createExcel()
     val headerStyle = CellStyle(bold = true)
     val currencyStyle = CellStyle(numberFormat = NumFormat.standard_4)
@@ -102,13 +109,13 @@ actual fun generateSingleMonthXlsx(expenses: List<Expense>, month: Month, year: 
 
     val monthNum = month.ordinal + 1
     val monthExpenses = expenses
-        .filter { it.date.monthNumber == monthNum && it.date.year == year }
+        .filter { it.date.month.number == monthNum && it.date.year == year }
         .sortedBy { it.date }
     val total = monthExpenses.sumOf { it.amount }
     val prevMonth = Month.entries[if (month.ordinal == 0) 11 else month.ordinal - 1]
     val prevYear = if (month == Month.January) year - 1 else year
     val prevTotal = expenses
-        .filter { it.date.monthNumber == prevMonth.ordinal + 1 && it.date.year == prevYear }
+        .filter { it.date.month.number == prevMonth.ordinal + 1 && it.date.year == prevYear }
         .sumOf { it.amount }
     val difference = total - prevTotal
 
@@ -154,5 +161,7 @@ actual fun generateSingleMonthXlsx(expenses: List<Expense>, month: Month, year: 
 
     excel.delete("Sheet1")
     excel.setDefaultSheet("${month.stringName} $year")
-    return withAutoFilter(excel.encode() ?: error("Failed to encode workbook"))
+    val bytes =
+        excel.encode() ?: return Result.failure(IllegalStateException("Failed to encode workbook"))
+    withAutoFilter(bytes)
 }

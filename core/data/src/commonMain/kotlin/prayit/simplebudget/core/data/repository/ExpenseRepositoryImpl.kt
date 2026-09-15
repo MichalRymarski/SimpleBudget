@@ -47,6 +47,6 @@ private fun Expense.toEntity() = ExpenseEntity(
     id = id,
     title = title,
     amount = amount,
-    date = date.toEpochDays().toLong(),
+    date = date.toEpochDays(),
     tag = tag,
 )

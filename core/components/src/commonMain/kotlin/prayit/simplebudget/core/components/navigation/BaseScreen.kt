@@ -3,7 +3,6 @@ package prayit.simplebudget.core.components.navigation
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -28,10 +27,12 @@ fun BaseScreen(
     deviceClass: DeviceClass,
     items: List<NavigationItem> = emptyList(),
     floatingActionButton: @Composable (() -> Unit)? = null,
+    topBar: @Composable (() -> Unit)? = null,
     content: @Composable (Modifier) -> Unit,
 ) {
     if (deviceClass.isCompact) {
         Scaffold(
+            topBar = { topBar?.invoke() },
             bottomBar = {
                 if (items.isNotEmpty()) {
                     NavigationBar {
@@ -53,6 +54,7 @@ fun BaseScreen(
     } else {
         Scaffold(
             modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
+            topBar = { topBar?.invoke() },
             floatingActionButton = { floatingActionButton?.invoke() },
         ) { paddingValues ->
             Row(Modifier.padding(paddingValues)) {

@@ -3,9 +3,10 @@ package prayit.simplebudget.feature.home.ui
 internal fun padZero(value: Int): String = if (value < 10) "0$value" else "$value"
 
 internal fun formatCurrency(value: Double): String {
-    val whole = value.toLong()
-    val fraction = ((value - whole) * 100).toInt().let { padZero(it) }
-    return "$whole.$fraction"
+    val totalCents = kotlin.math.round(value * 100).toLong()
+    val sign = if (totalCents < 0) "-" else ""
+    val absCents = kotlin.math.abs(totalCents)
+    return "$sign${absCents / 100}.${(absCents % 100).toString().padStart(2, '0')}"
 }
 
 internal fun formatSigned(value: Double): String {

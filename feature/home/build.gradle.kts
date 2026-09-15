@@ -1,3 +1,7 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kmp.library)
@@ -31,7 +35,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":core:domain"))
-            api(project(":core:export"))
             api(project(":core:utils"))
             api(project(":core:resources"))
             api(project(":core:components"))

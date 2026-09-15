@@ -1,9 +1,10 @@
 package prayit.simplebudget.export
 
-actual fun shareCsvFile(fileName: String, csvContent: String, subject: String) {
-    // TODO: iOS sharing via UIActivityViewController
-}
+private fun iosSharingUnsupported(): Result<Unit> =
+    Result.failure(UnsupportedOperationException("File sharing is not supported on iOS yet"))
 
-actual fun shareXlsxFile(fileName: String, byteArray: ByteArray, subject: String) {
-    // TODO: iOS sharing via UIActivityViewController
-}
+actual fun shareCsvFile(fileName: String, csvContent: String, subject: String): Result<Unit> =
+    iosSharingUnsupported()
+
+actual fun shareXlsxFile(fileName: String, byteArray: ByteArray, subject: String): Result<Unit> =
+    iosSharingUnsupported()

@@ -1,9 +1,13 @@
 package prayit.simplebudget.androidApp.notification
 
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -11,6 +15,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import prayit.simplebudget.androidApp.R
 import prayit.simplebudget.core.domain.model.Expense
 import prayit.simplebudget.core.domain.repository.PendingExpenseRepository
 import prayit.simplebudget.di.Graph
@@ -25,6 +30,11 @@ class ExpenseNotificationListener : NotificationListenerService() {
         repositoryOverride ?: Graph.app.pendingExpenseRepository
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun onCreate() {
+        super.onCreate()
+        createNotificationChannel()
+    }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         try {
@@ -46,7 +56,8 @@ class ExpenseNotificationListener : NotificationListenerService() {
             )
             scope.launch {
                 try {
-                    repository().stageAndCommit(expense)
+                    val inserted = repository().stageAndCommit(expense)
+                    if (inserted) showExpenseNotification(expense)
                 } catch (e: Exception) {
                     Log.w(TAG, "stageAndCommit failed", e)
                 }
@@ -56,6 +67,40 @@ class ExpenseNotificationListener : NotificationListenerService() {
         }
     }
 
+    private fun createNotificationChannel() {
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "Expense Captures",
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ).apply {
+            description = "Notifications when expenses are captured from payment apps"
+        }
+        getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+    }
+
+    private fun showExpenseNotification(expense: Expense) {
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            expense.id.hashCode(),
+            launchIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        val amount = "%.2f".format(expense.amount)
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_expense_captured)
+            .setColor(0xFF6D5E0F.toInt())
+            .setContentTitle(expense.title)
+            .setContentText("$amount · ${expense.tag}")
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        getSystemService(NotificationManager::class.java)
+            .notify(expense.id.hashCode(), notification)
+    }
+
     override fun onDestroy() {
         scope.cancel()
         super.onDestroy()
@@ -63,5 +108,6 @@ class ExpenseNotificationListener : NotificationListenerService() {
 
     companion object {
         private const val TAG = "ExpenseNotifListener"
+        private const val CHANNEL_ID = "expense_captures"
     }
 }

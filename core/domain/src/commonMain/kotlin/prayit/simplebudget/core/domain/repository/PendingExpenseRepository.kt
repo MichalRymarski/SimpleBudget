@@ -5,7 +5,7 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 interface PendingExpenseRepository {
-    suspend fun stageAndCommit(expense: Expense)
+    suspend fun stageAndCommit(expense: Expense): Boolean
 
     @OptIn(ExperimentalTime::class)
     suspend fun purgeExpired(nowEpochMillis: Long = Clock.System.now().toEpochMilliseconds())

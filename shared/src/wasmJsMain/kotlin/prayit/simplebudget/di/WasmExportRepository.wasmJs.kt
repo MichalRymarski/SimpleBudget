@@ -59,6 +59,29 @@ class WasmExportRepository : ExportRepository {
 
     override fun openAutoCaptureSettings() = Unit
 
+    // Browsers cannot send SMTP email (no JavaMail on wasmJs).
+    // Callers surface the failure via error snackbar.
+    override suspend fun sendExportEmail(
+        expenses: List<Expense>,
+        monthNumber: Int,
+        year: Int,
+        attachmentName: String,
+    ): Result<Unit> = emailUnsupported()
+
+    override suspend fun sendCsvEmail(
+        expenses: List<Expense>,
+        monthNumber: Int,
+        year: Int,
+    ): Result<Unit> = emailUnsupported()
+
+    override suspend fun sendHistoryEmail(expenses: List<Expense>): Result<Unit> =
+        emailUnsupported()
+
+    override suspend fun sendTestEmail(): Result<Unit> = emailUnsupported()
+
+    private fun emailUnsupported(): Result<Unit> =
+        Result.failure(UnsupportedOperationException("Email export is not supported on web"))
+
     private fun monthFileName(monthNumber: Int, year: Int, extension: String?): String {
         val base = "Budget-${monthNumber.toString().padStart(2, '0')}.$year"
         return if (extension == null) base else "$base.$extension"

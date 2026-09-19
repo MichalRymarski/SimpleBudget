@@ -20,7 +20,6 @@ import kotlinx.datetime.todayIn
 import prayit.simplebudget.core.domain.model.Expense
 import prayit.simplebudget.core.domain.repository.ExpenseRepository
 import prayit.simplebudget.core.domain.repository.ExportRepository
-import prayit.simplebudget.core.domain.repository.PendingExpenseRepository
 import prayit.simplebudget.core.utils.Month
 import prayit.simplebudget.di.AppScope
 import kotlin.time.Clock
@@ -30,11 +29,10 @@ import kotlin.time.Clock
 class HomeViewModel(
     private val expenseRepository: ExpenseRepository,
     private val exportRepository: ExportRepository,
-    private val pendingExpenseRepository: PendingExpenseRepository,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
-    private val todayMonth = Month.entries[today.monthNumber - 1]
+    private val todayMonth = Month.entries[today.month.number - 1]
 
     private val _monthYear = MutableStateFlow(MonthYear(todayMonth, today.year))
     private val _showAddSheet = MutableStateFlow(false)
@@ -50,7 +48,7 @@ class HomeViewModel(
         _exportError,
     ) { expenses, monthYear, showAddSheet, form, exportError ->
         val filtered = expenses
-            .filter { it.date.monthNumber == monthYear.month.ordinal + 1 && it.date.year == monthYear.year }
+            .filter { it.date.month.number == monthYear.month.ordinal + 1 && it.date.year == monthYear.year }
             .map { it.toItem() }
 
         val prevMonth = monthYear.month.previous()

@@ -36,9 +36,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import com.composables.icons.lucide.ChevronLeft
 import com.composables.icons.lucide.Eye
 import com.composables.icons.lucide.EyeOff
+import com.composables.icons.lucide.Key
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Mail
 import com.composables.icons.lucide.Send
+import org.jetbrains.compose.resources.stringResource
 import prayit.simplebudget.core.components.navigation.BaseScreen
 import prayit.simplebudget.core.components.theme.LocalAppSpacing
 import prayit.simplebudget.core.components.theme.MParafiaTheme
@@ -55,7 +57,6 @@ import simplebudget.core.resources.generated.resources.settings_recipient_email
 import simplebudget.core.resources.generated.resources.settings_send_test_email
 import simplebudget.core.resources.generated.resources.settings_sender_email
 import simplebudget.core.resources.generated.resources.settings_title
-import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,7 +117,7 @@ fun SettingsContent(
                 value = content.settings.appPassword,
                 onValueChange = onAppPasswordChanged,
                 label = stringResource(Res.string.settings_app_password),
-                leadingIcon = { Icon(Lucide.Mail, contentDescription = null) },
+                leadingIcon = { Icon(Lucide.Key, contentDescription = null) },
                 keyboardType = KeyboardType.Password,
                 isPassword = true,
             )

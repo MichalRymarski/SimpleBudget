@@ -19,6 +19,16 @@ android {
         versionName = "1.0.0"
     }
 
+    flavorDimensions += "environment"
+
+    productFlavors {
+        create("staging") {
+            dimension = "environment"
+            applicationIdSuffix = ".staging"
+            versionNameSuffix = "-staging"
+        }
+    }
+
     signingConfigs {
         create("release") {
             // Secrets come from local.properties or env (RELEASE_STORE_FILE etc.).
@@ -89,6 +99,7 @@ dependencies {
     implementation(libs.androidx.activityCompose)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.datetime)
+    implementation(libs.androidx.work.runtime)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
     testImplementation(kotlin("test"))

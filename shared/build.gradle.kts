@@ -58,6 +58,7 @@ kotlin {
             api(project(":core:export"))
             api(project(":feature:home"))
             api(project(":feature:budgetItem"))
+            api(project(":feature:settings"))
             api(libs.compose.runtime)
             api(libs.compose.ui)
             api(libs.compose.foundation)
@@ -92,6 +93,7 @@ kotlin {
         val nonJsMain by getting {
             dependencies {
                 api(project(":core:data"))
+                implementation(libs.androidx.datastore.preferences)
             }
         }
         androidMain {

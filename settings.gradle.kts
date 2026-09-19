@@ -41,6 +41,7 @@ val moduleList = listOf(
     ":core:export",
     ":feature:home",
     ":feature:budgetItem",
+    ":feature:settings",
     ":webApp",
 )
 moduleList.forEach {

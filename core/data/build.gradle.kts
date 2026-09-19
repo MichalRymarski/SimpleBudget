@@ -33,6 +33,7 @@ kotlin {
             implementation(libs.room.sqlite.bundled)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.androidx.datastore.preferences)
         }
         androidMain.dependencies {
             implementation(libs.kotlinx.coroutines.android)

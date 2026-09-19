@@ -6,11 +6,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import prayit.simplebudget.core.utils.DeviceClass
@@ -30,6 +33,30 @@ fun BaseScreen(
     topBar: @Composable (() -> Unit)? = null,
     content: @Composable (Modifier) -> Unit,
 ) {
+    val snackbarHostState = LocalSnackbarHostState.current
+    val snackbarType = LocalSnackbarType.current
+
+    val snackbarContainer: @Composable () -> Unit = {
+        SnackbarHost(
+            hostState = snackbarHostState,
+            snackbar = { data ->
+                val containerColor = when (snackbarType) {
+                    SnackbarType.SUCCESS -> MaterialTheme.colorScheme.primaryContainer
+                    SnackbarType.ERROR -> MaterialTheme.colorScheme.errorContainer
+                }
+                val contentColor = when (snackbarType) {
+                    SnackbarType.SUCCESS -> MaterialTheme.colorScheme.onPrimaryContainer
+                    SnackbarType.ERROR -> MaterialTheme.colorScheme.onErrorContainer
+                }
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = containerColor,
+                    contentColor = contentColor,
+                )
+            },
+        )
+    }
+
     if (deviceClass.isCompact) {
         Scaffold(
             topBar = { topBar?.invoke() },
@@ -48,6 +75,7 @@ fun BaseScreen(
                 }
             },
             floatingActionButton = { floatingActionButton?.invoke() },
+            snackbarHost = snackbarContainer,
         ) { paddingValues ->
             content(Modifier.padding(paddingValues))
         }
@@ -56,6 +84,7 @@ fun BaseScreen(
             modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
             topBar = { topBar?.invoke() },
             floatingActionButton = { floatingActionButton?.invoke() },
+            snackbarHost = snackbarContainer,
         ) { paddingValues ->
             Row(Modifier.padding(paddingValues)) {
                 if (items.isNotEmpty()) {

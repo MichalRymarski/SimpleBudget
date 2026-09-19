@@ -24,7 +24,6 @@ class InMemoryExpenseRepository :
     private data class Entry(val expense: Expense, val capturedAt: Long)
 
     private val _entries = MutableStateFlow<List<Entry>>(emptyList())
-    private val _rawLog = MutableStateFlow<List<String>>(emptyList())
 
     override fun getExpenses(): Flow<List<Expense>> =
         _entries.map { list -> list.map { it.expense } }
@@ -52,12 +51,6 @@ class InMemoryExpenseRepository :
         if (duplicate) return
         _entries.update { it + Entry(expense, now()) }
     }
-
-    override suspend fun logRawNotification(json: String) {
-        _rawLog.update { it + json }
-    }
-
-    override suspend fun getRawNotifications(): List<String> = _rawLog.value
 
     override suspend fun purgeExpired(nowEpochMillis: Long) {
         _entries.update { list -> list.filterNot { nowEpochMillis - it.capturedAt > EXPIRY_MILLIS } }

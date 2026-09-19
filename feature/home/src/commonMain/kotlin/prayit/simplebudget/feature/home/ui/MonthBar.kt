@@ -36,10 +36,8 @@ import simplebudget.core.resources.generated.resources.home_export_content_descr
 import simplebudget.core.resources.generated.resources.home_export_history_xlsx
 import simplebudget.core.resources.generated.resources.home_export_month_csv
 import simplebudget.core.resources.generated.resources.home_export_month_xlsx
-import simplebudget.core.resources.generated.resources.home_export_notifications
 import simplebudget.core.resources.generated.resources.home_next_month
 import simplebudget.core.resources.generated.resources.home_previous_month
-import simplebudget.core.resources.generated.resources.home_test_notification
 
 @Composable
 internal fun MonthBar(
@@ -52,8 +50,6 @@ internal fun MonthBar(
     onExportMonth: () -> Unit = {},
     onExportMonthXlsx: () -> Unit = {},
     onExportHistory: () -> Unit = {},
-    onExportNotifications: () -> Unit = {},
-    onTestNotification: () -> Unit = {},
 ) {
     var showExportMenu by remember { mutableStateOf(false) }
     val spacing = LocalAppSpacing.current
@@ -122,20 +118,6 @@ internal fun MonthBar(
                         onClick = {
                             showExportMenu = false
                             onExportHistory()
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(Res.string.home_export_notifications)) },
-                        onClick = {
-                            showExportMenu = false
-                            onExportNotifications()
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(Res.string.home_test_notification)) },
-                        onClick = {
-                            showExportMenu = false
-                            onTestNotification()
                         },
                     )
                 }

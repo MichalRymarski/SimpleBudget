@@ -11,7 +11,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
-import org.json.JSONObject
 import prayit.simplebudget.core.domain.model.Expense
 import prayit.simplebudget.core.domain.repository.PendingExpenseRepository
 import prayit.simplebudget.di.Graph
@@ -29,46 +28,15 @@ class ExpenseNotificationListener : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         try {
-            if (sbn == null) {
-                Log.d(TAG, "onNotificationPosted: sbn is null")
-                return
-            }
-            Log.d(
-                TAG,
-                "onNotificationPosted: package=${sbn.packageName} id=${sbn.id} tag=${sbn.tag}"
-            )
+            if (sbn == null) return
             val extras = sbn.notification?.extras
             val title = extras?.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
             val text = extras?.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty()
             val bigText = extras?.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString().orEmpty()
             val body = bigText.ifBlank { text }
-            Log.d(
-                TAG,
-                "  title='$title' text='$text' bigText='${bigText.take(80)}' body='${body.take(80)}'"
-            )
-            logRaw(sbn, title, body)
-            val pkg = PaymentPackage.fromPackage(sbn.packageName)
-            if (pkg == null) {
-                Log.d(TAG, "  SKIP: package '${sbn.packageName}' not in PaymentPackage enum")
-                return
-            }
-            Log.d(TAG, "  MATCHED package: $pkg")
-            if (title.isBlank() && body.isBlank()) {
-                Log.d(TAG, "  SKIP: title and body are both blank")
-                return
-            }
-            val parsed = PaymentNotificationParser.parse(pkg, title, body)
-            if (parsed == null) {
-                Log.d(
-                    TAG,
-                    "  SKIP: parser returned null for pkg=$pkg title='$title' body='${body.take(60)}'"
-                )
-                return
-            }
-            Log.d(
-                TAG,
-                "  PARSED: title='${parsed.title}' amount=${parsed.amount} tag='${parsed.tag}' merchant='${parsed.merchant}'"
-            )
+            val pkg = PaymentPackage.fromPackage(sbn.packageName) ?: return
+            if (title.isBlank() && body.isBlank()) return
+            val parsed = PaymentNotificationParser.parse(pkg, title, body) ?: return
             val expense = Expense(
                 id = "notif_${System.currentTimeMillis()}",
                 title = parsed.title,
@@ -79,34 +47,12 @@ class ExpenseNotificationListener : NotificationListenerService() {
             scope.launch {
                 try {
                     repository().stageAndCommit(expense)
-                    Log.d(
-                        TAG,
-                        "  STAGED expense: id=${expense.id} title='${expense.title}' amount=${expense.amount}"
-                    )
                 } catch (e: Exception) {
                     Log.w(TAG, "stageAndCommit failed", e)
                 }
             }
         } catch (e: Exception) {
             Log.w(TAG, "onNotificationPosted failed", e)
-        }
-    }
-
-    private fun logRaw(sbn: StatusBarNotification, title: String, body: String) {
-        val json = JSONObject()
-            .put("package", sbn.packageName)
-            .put("time", sbn.postTime)
-            .put("id", sbn.id)
-            .put("tag", sbn.tag)
-            .put("title", title)
-            .put("body", body)
-            .toString()
-        scope.launch {
-            try {
-                repository().logRawNotification(json)
-            } catch (e: Exception) {
-                Log.w(TAG, "logRawNotification failed", e)
-            }
         }
     }
 

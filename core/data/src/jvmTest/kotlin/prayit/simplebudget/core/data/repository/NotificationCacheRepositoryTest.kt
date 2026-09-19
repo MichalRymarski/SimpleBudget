@@ -9,10 +9,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import prayit.simplebudget.core.data.dao.ExpenseDao
 import prayit.simplebudget.core.data.dao.NotificationCacheDao
-import prayit.simplebudget.core.data.dao.NotificationDebugDao
 import prayit.simplebudget.core.data.entity.ExpenseEntity
 import prayit.simplebudget.core.data.entity.NotificationCacheEntity
-import prayit.simplebudget.core.data.entity.NotificationDebugEntity
 import prayit.simplebudget.core.domain.model.Expense
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -46,12 +44,10 @@ private class FakeNotificationCacheDao : NotificationCacheDao {
     }
 
     override suspend fun existsDuplicate(
-        title: String,
         amount: Double,
         date: Long,
-        tag: String,
     ): Boolean =
-        rows.any { it.title == title && it.amount == amount && it.date == date && it.tag == tag }
+        rows.any { it.amount == amount && it.date == date }
 
     override suspend fun deleteOlderThan(cutoff: Long) {
         rows.removeAll { it.capturedAt < cutoff }
@@ -66,20 +62,6 @@ private class FakeNotificationCacheDao : NotificationCacheDao {
     }
 }
 
-private class FakeNotificationDebugDao : NotificationDebugDao {
-    val rows = mutableListOf<NotificationDebugEntity>()
-
-    override suspend fun insert(entry: NotificationDebugEntity) {
-        rows += entry
-    }
-
-    override suspend fun getAllJson(): List<String> = rows.map { it.dataJson }
-
-    override suspend fun clear() {
-        rows.clear()
-    }
-}
-
 class NotificationCacheRepositoryTest {
 
     @OptIn(ExperimentalTime::class)
@@ -88,7 +70,7 @@ class NotificationCacheRepositoryTest {
         val expenses = FakeExpenseDao()
         val cache = FakeNotificationCacheDao()
         val repository =
-            NotificationCacheRepositoryImpl(cache, expenses, FakeNotificationDebugDao())
+            NotificationCacheRepositoryImpl(cache, expenses)
         val title = "Biedronka"
         val expense = Expense(
             id = "notif_1",

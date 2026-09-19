@@ -26,11 +26,6 @@ enum class PaymentPackage(
         packageName = "pl.ing.mojeing",
         amountRegexFirst = Regex("""(?i)(zł|pln|€|eur|\$|usd)\s*(\d[\d\s.,]*)"""),
         amountRegexLast = Regex("""(?i)(\d[\d\s.,]*)\s*(zł|pln|€|eur|\$|usd)"""),
-    ),
-    TEST(
-        packageName = "prayit.simplebudget.androidApp.staging",
-        amountRegexFirst = Regex("""(?i)(zł|pln|€|eur|\$|usd)\s*(\d[\d\s.,]*)"""),
-        amountRegexLast = Regex("""(?i)(\d[\d\s.,]*)\s*(zł|pln|€|eur|\$|usd)"""),
     );
 
     companion object {

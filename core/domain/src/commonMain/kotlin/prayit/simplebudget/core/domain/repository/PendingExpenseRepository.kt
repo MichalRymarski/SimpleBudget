@@ -9,8 +9,4 @@ interface PendingExpenseRepository {
 
     @OptIn(ExperimentalTime::class)
     suspend fun purgeExpired(nowEpochMillis: Long = Clock.System.now().toEpochMilliseconds())
-
-    suspend fun logRawNotification(json: String)
-
-    suspend fun getRawNotifications(): List<String>
 }

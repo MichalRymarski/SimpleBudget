@@ -23,7 +23,6 @@ import prayit.simplebudget.core.domain.repository.ExportRepository
 import prayit.simplebudget.core.domain.repository.PendingExpenseRepository
 import prayit.simplebudget.core.utils.Month
 import prayit.simplebudget.di.AppScope
-import prayit.simplebudget.export.postTestNotification
 import kotlin.time.Clock
 
 @SingleIn(AppScope::class)
@@ -166,14 +165,6 @@ class HomeViewModel(
         }
     }
 
-    fun onExportNotifications() {
-        scope.launch {
-            val items = pendingExpenseRepository.getRawNotifications()
-            exportRepository.exportNotificationsJson(items)
-                .onFailure(::showExportError)
-        }
-    }
-
     fun onExportErrorDismiss() {
         _exportError.update { null }
     }
@@ -188,10 +179,6 @@ class HomeViewModel(
 
     fun openNotificationSettings() {
         exportRepository.openAutoCaptureSettings()
-    }
-
-    fun onTestNotification() {
-        postTestNotification()
     }
 
     private fun showExportError(throwable: Throwable) {

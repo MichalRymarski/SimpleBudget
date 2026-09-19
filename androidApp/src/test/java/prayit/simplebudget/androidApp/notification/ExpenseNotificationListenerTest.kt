@@ -27,18 +27,11 @@ class ExpenseNotificationListenerTest {
 
     private class FakePendingExpenseRepository : PendingExpenseRepository {
         val staged = Collections.synchronizedList(mutableListOf<Expense>())
-        val rawLog = Collections.synchronizedList(mutableListOf<String>())
         override suspend fun stageAndCommit(expense: Expense) {
             staged += expense
         }
 
         override suspend fun purgeExpired(nowEpochMillis: Long) = Unit
-
-        override suspend fun logRawNotification(json: String) {
-            rawLog += json
-        }
-
-        override suspend fun getRawNotifications(): List<String> = rawLog.toList()
     }
 
     private val fake = FakePendingExpenseRepository()
@@ -122,22 +115,6 @@ class ExpenseNotificationListenerTest {
         runBlocking {
             delay(1_500.milliseconds)
             assertTrue(fake.staged.isEmpty())
-        }
-    }
-
-    @Test
-    fun allNotificationsAreLoggedAsJson() {
-        postNotification("com.random.app", "Some title", "Some body text")
-        runBlocking {
-            withTimeout(10_000.milliseconds) {
-                while (fake.rawLog.isEmpty()) {
-                    delay(100.milliseconds)
-                }
-            }
-            val logged = fake.rawLog.first()
-            assertTrue(logged.contains("com.random.app"))
-            assertTrue(logged.contains("Some title"))
-            assertTrue(logged.contains("Some body text"))
         }
     }
 

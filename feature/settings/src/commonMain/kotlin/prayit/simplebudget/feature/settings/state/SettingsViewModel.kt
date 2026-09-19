@@ -2,6 +2,7 @@ package prayit.simplebudget.feature.settings.state
 
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,8 +28,9 @@ import prayit.simplebudget.di.AppScope
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val exportRepository: ExportRepository,
+    coroutineContext: CoroutineContext = SupervisorJob() + Dispatchers.Default,
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val scope = CoroutineScope(coroutineContext)
     private val _isSaving = MutableStateFlow(false)
     private val _snackbarMessages = MutableSharedFlow<SnackbarMessage>()
 

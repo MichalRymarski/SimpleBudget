@@ -2,6 +2,7 @@ package prayit.simplebudget.feature.home.state
 
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -35,8 +36,9 @@ class HomeViewModel(
     private val expenseRepository: ExpenseRepository,
     private val exportRepository: ExportRepository,
     private val settingsRepository: SettingsRepository,
+    coroutineContext: CoroutineContext = SupervisorJob() + Dispatchers.Default,
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val scope = CoroutineScope(coroutineContext)
     private val today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
     private val todayMonth = Month.entries[today.month.number - 1]
 

@@ -49,5 +49,9 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling)
         }
+        commonTest.dependencies {
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(kotlin("test"))
+        }
     }
 }

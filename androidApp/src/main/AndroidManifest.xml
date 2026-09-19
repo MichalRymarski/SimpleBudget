@@ -4,7 +4,7 @@
     <application
         android:name=".MParafiaApp"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="SimpleBudget"
         android:theme="@android:style/Theme.Material.NoActionBar">
         <activity
             android:name=".AppActivity"

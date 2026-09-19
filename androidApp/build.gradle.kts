@@ -19,10 +19,6 @@ android {
         versionName = "1.0.0"
     }
 
-    buildFeatures {
-        resValues = true
-    }
-
     signingConfigs {
         create("release") {
             // Secrets come from local.properties or env (RELEASE_STORE_FILE etc.).

@@ -10,11 +10,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowInsetsControllerCompat
 import prayit.simplebudget.App
+import prayit.simplebudget.androidApp.worker.scheduleMonthlyExport
 
 class AppActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        scheduleMonthlyExport(this)
         setContent {
             App(onThemeChanged = { ThemeChanged(it) })
         }

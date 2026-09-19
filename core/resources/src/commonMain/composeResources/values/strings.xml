@@ -33,4 +33,15 @@
 
     <!-- Accessibility -->
     <string name="missing_accessibility">Missing accessibility</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Auto-export settings</string>
+    <string name="settings_recipient_email">Recipient email</string>
+    <string name="settings_sender_email">Sender email (Gmail)</string>
+    <string name="settings_app_password">App password</string>
+    <string name="settings_app_password_help">Get app password</string>
+    <string name="settings_send_test_email">Send test email</string>
+    <string name="settings_auto_export">Auto-export monthly</string>
+    <string name="settings_auto_export_with_manual">Also send on manual export</string>
+    <string name="settings_menu_item">Auto-export settings</string>
 </resources>

@@ -34,6 +34,8 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
             implementation(libs.androidx.datastore.preferences)
+            implementation(libs.cryptography.core)
+            implementation(libs.cryptography.provider.optimal)
         }
         androidMain.dependencies {
             implementation(libs.kotlinx.coroutines.android)

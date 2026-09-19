@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import prayit.simplebudget.core.components.navigation.SnackbarMessage
 import prayit.simplebudget.core.components.navigation.BaseScreen
 import prayit.simplebudget.core.components.theme.LocalAppSpacing
 import prayit.simplebudget.core.components.theme.MParafiaTheme
@@ -36,6 +37,8 @@ fun HomeScreen(
     deviceClass: DeviceClass = DeviceClass.PhonePortrait,
     onBack: () -> Unit = {},
     onExpenseClick: (id: String) -> Unit = {},
+    onOpenSettings: () -> Unit = {},
+    onSnackbarMessage: (SnackbarMessage) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -45,6 +48,12 @@ fun HomeScreen(
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.snackbarMessages.collect { message ->
+            onSnackbarMessage(message)
+        }
     }
 
     HomeContent(
@@ -66,6 +75,7 @@ fun HomeScreen(
         onExportErrorDismiss = viewModel::onExportErrorDismiss,
         onNotificationBannerDismiss = viewModel::onNotificationBannerDismiss,
         onOpenNotificationSettings = viewModel::openNotificationSettings,
+        onOpenSettings = onOpenSettings,
     )
 }
 
@@ -90,6 +100,7 @@ fun HomeContent(
     onExportErrorDismiss: () -> Unit = {},
     onNotificationBannerDismiss: () -> Unit = {},
     onOpenNotificationSettings: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
 ) {
     val content = state as? HomeState.Content ?: return
 
@@ -171,6 +182,7 @@ fun HomeContent(
                 onExportMonth = onExportMonth,
                 onExportMonthXlsx = onExportMonthXlsx,
                 onExportHistory = onExportHistory,
+                onOpenSettings = onOpenSettings,
             )
         }
     }

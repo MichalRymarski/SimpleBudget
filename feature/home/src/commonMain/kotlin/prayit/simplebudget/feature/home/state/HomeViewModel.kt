@@ -5,9 +5,11 @@ import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -17,9 +19,12 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.todayIn
+import prayit.simplebudget.core.components.navigation.SnackbarMessage
+import prayit.simplebudget.core.components.navigation.SnackbarType
 import prayit.simplebudget.core.domain.model.Expense
 import prayit.simplebudget.core.domain.repository.ExpenseRepository
 import prayit.simplebudget.core.domain.repository.ExportRepository
+import prayit.simplebudget.core.domain.repository.SettingsRepository
 import prayit.simplebudget.core.utils.Month
 import prayit.simplebudget.di.AppScope
 import kotlin.time.Clock
@@ -29,6 +34,7 @@ import kotlin.time.Clock
 class HomeViewModel(
     private val expenseRepository: ExpenseRepository,
     private val exportRepository: ExportRepository,
+    private val settingsRepository: SettingsRepository,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
@@ -39,6 +45,9 @@ class HomeViewModel(
     private val _formState = MutableStateFlow(FormState())
     private val _exportError = MutableStateFlow<String?>(null)
     private val _notificationBanner = MutableStateFlow(false)
+    private val _snackbarMessages = MutableSharedFlow<SnackbarMessage>()
+
+    val snackbarMessages = _snackbarMessages.asSharedFlow()
 
     val state: StateFlow<HomeState> = combine(
         expenseRepository.getExpenses(),
@@ -141,8 +150,17 @@ class HomeViewModel(
         scope.launch {
             val allExpenses = expenseRepository.getExpenses().first()
             val my = _monthYear.value
-            exportRepository.exportMonthCsv(allExpenses, my.month.ordinal + 1, my.year)
-                .onFailure(::showExportError)
+            val settings = settingsRepository.getSettings().first()
+
+            if (settings.autoExportWithManual) {
+                exportRepository.sendCsvEmail(allExpenses, my.month.ordinal + 1, my.year)
+                    .onSuccess { _snackbarMessages.emit(SnackbarMessage("CSV exported and emailed", SnackbarType.SUCCESS)) }
+                    .onFailure { _snackbarMessages.emit(SnackbarMessage(it.message ?: "Failed to email CSV", SnackbarType.ERROR)) }
+            } else {
+                exportRepository.exportMonthCsv(allExpenses, my.month.ordinal + 1, my.year)
+                    .onSuccess { _snackbarMessages.emit(SnackbarMessage("Month CSV exported", SnackbarType.SUCCESS)) }
+                    .onFailure { _snackbarMessages.emit(SnackbarMessage(it.message ?: "Export failed", SnackbarType.ERROR)) }
+            }
         }
     }
 
@@ -150,16 +168,36 @@ class HomeViewModel(
         scope.launch {
             val allExpenses = expenseRepository.getExpenses().first()
             val my = _monthYear.value
-            exportRepository.exportMonthXlsx(allExpenses, my.month.ordinal + 1, my.year)
-                .onFailure(::showExportError)
+            val settings = settingsRepository.getSettings().first()
+
+            if (settings.autoExportWithManual) {
+                val month = my.month.ordinal + 1
+                val fileName = "Budget-${month.toString().padStart(2, '0')}.${my.year}.xlsx"
+                exportRepository.sendExportEmail(allExpenses, month, my.year, fileName)
+                    .onSuccess { _snackbarMessages.emit(SnackbarMessage("XLSX exported and emailed", SnackbarType.SUCCESS)) }
+                    .onFailure { _snackbarMessages.emit(SnackbarMessage(it.message ?: "Failed to email XLSX", SnackbarType.ERROR)) }
+            } else {
+                exportRepository.exportMonthXlsx(allExpenses, my.month.ordinal + 1, my.year)
+                    .onSuccess { _snackbarMessages.emit(SnackbarMessage("Month XLSX exported", SnackbarType.SUCCESS)) }
+                    .onFailure { _snackbarMessages.emit(SnackbarMessage(it.message ?: "Export failed", SnackbarType.ERROR)) }
+            }
         }
     }
 
     fun onExportHistory() {
         scope.launch {
             val allExpenses = expenseRepository.getExpenses().first()
-            exportRepository.exportHistoryXlsx(allExpenses)
-                .onFailure(::showExportError)
+            val settings = settingsRepository.getSettings().first()
+
+            if (settings.autoExportWithManual) {
+                exportRepository.sendHistoryEmail(allExpenses)
+                    .onSuccess { _snackbarMessages.emit(SnackbarMessage("History exported and emailed", SnackbarType.SUCCESS)) }
+                    .onFailure { _snackbarMessages.emit(SnackbarMessage(it.message ?: "Failed to email history", SnackbarType.ERROR)) }
+            } else {
+                exportRepository.exportHistoryXlsx(allExpenses)
+                    .onSuccess { _snackbarMessages.emit(SnackbarMessage("History XLSX exported", SnackbarType.SUCCESS)) }
+                    .onFailure { _snackbarMessages.emit(SnackbarMessage(it.message ?: "Export failed", SnackbarType.ERROR)) }
+            }
         }
     }
 

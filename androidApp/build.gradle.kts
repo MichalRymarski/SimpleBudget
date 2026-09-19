@@ -93,4 +93,5 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
     testImplementation(kotlin("test"))
+    testImplementation(kotlin("test-junit"))
 }

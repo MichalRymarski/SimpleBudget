@@ -63,6 +63,8 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)
+            implementation(libs.android.mail)
+            implementation(libs.android.activation)
         }
         wasmJsMain.dependencies {
             implementation(libs.kotlinx.browser)

@@ -24,11 +24,11 @@ class NotificationCacheRepositoryImpl(
     private val dedupMutex = Mutex()
 
     @OptIn(ExperimentalTime::class)
-    override suspend fun stageAndCommit(expense: Expense) = dedupMutex.withLock {
+    override suspend fun stageAndCommit(expense: Expense): Boolean = dedupMutex.withLock {
         purgeExpired()
         val dateEpochDays = expense.date.toEpochDays()
         if (cacheDao.existsDuplicate(expense.amount, dateEpochDays)) {
-            return@withLock
+            return@withLock false
         }
         cacheDao.insert(
             NotificationCacheEntity(
@@ -40,6 +40,7 @@ class NotificationCacheRepositoryImpl(
             )
         )
         expenseDao.insert(expense.toEntity())
+        true
     }
 
     override suspend fun purgeExpired(nowEpochMillis: Long) {

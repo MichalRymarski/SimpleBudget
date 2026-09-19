@@ -19,7 +19,7 @@ object PaymentNotificationParser {
     )
 
     private val PAYMENT_VERB =
-        Regex("""(?i)\b(paid|sent|spent|payment|purchase|zapłac|wysłan|wydano|transakcj|płatność)""")
+        Regex("""(?i)\b(paid|spent|payment|purchase|zapłac|wydano|transakcj|płatność|obciąż|pobran|mniej)""")
 
     private val AT_MERCHANT = Regex("""(?i)\bat\s+([^\n]+)""")
 

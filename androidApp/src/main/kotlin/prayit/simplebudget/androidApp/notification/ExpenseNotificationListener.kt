@@ -44,9 +44,27 @@ class ExpenseNotificationListener : NotificationListenerService() {
             val text = extras?.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty()
             val bigText = extras?.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString().orEmpty()
             val body = bigText.ifBlank { text }
-            val pkg = PaymentPackage.fromPackage(sbn.packageName) ?: return
-            if (title.isBlank() && body.isBlank()) return
-            val parsed = PaymentNotificationParser.parse(pkg, title, body) ?: return
+
+            Log.d(TAG, "package=${sbn.packageName} title='$title' body='${body.take(100)}'")
+
+            val pkg = PaymentPackage.fromPackage(sbn.packageName)
+            if (pkg == null) {
+                Log.d(TAG, "SKIP: unknown package '${sbn.packageName}'")
+                return
+            }
+            if (title.isBlank() && body.isBlank()) {
+                Log.d(TAG, "SKIP: empty title and body")
+                return
+            }
+            val parsed = PaymentNotificationParser.parse(pkg, title, body)
+            if (parsed == null) {
+                Log.d(TAG, "SKIP: parser null title='$title' body='${body.take(80)}'")
+                return
+            }
+            Log.d(
+                TAG,
+                "PARSED: title='${parsed.title}' amount=${parsed.amount} tag='${parsed.tag}'"
+            )
             val expense = Expense(
                 id = "notif_${System.currentTimeMillis()}",
                 title = parsed.title,
@@ -57,7 +75,12 @@ class ExpenseNotificationListener : NotificationListenerService() {
             scope.launch {
                 try {
                     val inserted = repository().stageAndCommit(expense)
-                    if (inserted) showExpenseNotification(expense)
+                    if (inserted) {
+                        Log.d(TAG, "STAGED: ${expense.title} ${expense.amount}")
+                        showExpenseNotification(expense)
+                    } else {
+                        Log.d(TAG, "DUP: ${expense.title} ${expense.amount}")
+                    }
                 } catch (e: Exception) {
                     Log.w(TAG, "stageAndCommit failed", e)
                 }

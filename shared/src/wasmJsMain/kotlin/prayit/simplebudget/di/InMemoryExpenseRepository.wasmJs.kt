@@ -39,17 +39,16 @@ class InMemoryExpenseRepository :
         _entries.update { list -> list.filterNot { it.expense.id == id } }
     }
 
-    override suspend fun stageAndCommit(expense: Expense) {
+    override suspend fun stageAndCommit(expense: Expense): Boolean {
         purgeExpired()
         val dateEpochDays = expense.date.toEpochDays()
         val duplicate = _entries.value.any {
-            it.expense.title == expense.title &&
-                    it.expense.amount == expense.amount &&
-                    it.expense.date.toEpochDays() == dateEpochDays &&
-                    it.expense.tag == expense.tag
+            it.expense.amount == expense.amount &&
+                    it.expense.date.toEpochDays() == dateEpochDays
         }
-        if (duplicate) return
+        if (duplicate) return false
         _entries.update { it + Entry(expense, now()) }
+        return true
     }
 
     override suspend fun purgeExpired(nowEpochMillis: Long) {

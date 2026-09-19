@@ -27,8 +27,9 @@ class ExpenseNotificationListenerTest {
 
     private class FakePendingExpenseRepository : PendingExpenseRepository {
         val staged = Collections.synchronizedList(mutableListOf<Expense>())
-        override suspend fun stageAndCommit(expense: Expense) {
+        override suspend fun stageAndCommit(expense: Expense): Boolean {
             staged += expense
+            return true
         }
 
         override suspend fun purgeExpired(nowEpochMillis: Long) = Unit

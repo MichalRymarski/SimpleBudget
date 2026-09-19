@@ -54,3 +54,33 @@ actual fun shareXlsxFile(fileName: String, byteArray: ByteArray, subject: String
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     })
 }
+
+actual fun shareTextFile(
+    fileName: String,
+    textContent: String,
+    subject: String,
+    mimeType: String,
+): Result<Unit> =
+    runCatching {
+        val context: Context = prayit.simplebudget.core.utils.AppContext.requireInstance()
+        val cacheDir = File(context.cacheDir, "exports")
+        cacheDir.mkdirs()
+        val file = File(cacheDir, fileName)
+        file.writeText(textContent)
+
+        val uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            file,
+        )
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = mimeType
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(Intent.createChooser(intent, "Share file").apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        })
+    }

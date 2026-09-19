@@ -20,8 +20,10 @@ import kotlinx.datetime.todayIn
 import prayit.simplebudget.core.domain.model.Expense
 import prayit.simplebudget.core.domain.repository.ExpenseRepository
 import prayit.simplebudget.core.domain.repository.ExportRepository
+import prayit.simplebudget.core.domain.repository.PendingExpenseRepository
 import prayit.simplebudget.core.utils.Month
 import prayit.simplebudget.di.AppScope
+import prayit.simplebudget.export.postTestNotification
 import kotlin.time.Clock
 
 @SingleIn(AppScope::class)
@@ -29,6 +31,7 @@ import kotlin.time.Clock
 class HomeViewModel(
     private val expenseRepository: ExpenseRepository,
     private val exportRepository: ExportRepository,
+    private val pendingExpenseRepository: PendingExpenseRepository,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
@@ -163,6 +166,14 @@ class HomeViewModel(
         }
     }
 
+    fun onExportNotifications() {
+        scope.launch {
+            val items = pendingExpenseRepository.getRawNotifications()
+            exportRepository.exportNotificationsJson(items)
+                .onFailure(::showExportError)
+        }
+    }
+
     fun onExportErrorDismiss() {
         _exportError.update { null }
     }
@@ -177,6 +188,10 @@ class HomeViewModel(
 
     fun openNotificationSettings() {
         exportRepository.openAutoCaptureSettings()
+    }
+
+    fun onTestNotification() {
+        postTestNotification()
     }
 
     private fun showExportError(throwable: Throwable) {

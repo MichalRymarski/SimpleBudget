@@ -2,12 +2,6 @@ package prayit.simplebudget.export
 
 object PaymentNotificationParser {
 
-    const val WALLET_PACKAGE = "com.google.android.apps.walletnfcrel"
-    const val REVOLUT_PACKAGE = "com.revolut.revolut"
-    const val GPAY_PACKAGE = "com.google.android.apps.nbu.paisa.user"
-
-    val SUPPORTED_PACKAGES: Set<String> = setOf(WALLET_PACKAGE, GPAY_PACKAGE, REVOLUT_PACKAGE)
-
     data class ParsedPayment(
         val title: String,
         val merchant: String?,
@@ -25,11 +19,7 @@ object PaymentNotificationParser {
     )
 
     private val PAYMENT_VERB =
-        Regex("""(?i)\b(paid|sent|payment|purchase|zapłac|wysłan|transakcj)""")
-
-    private val AMOUNT = Regex(
-        """(?i)(?:(zł|pln|€|eur|\$|usd)\s*(\d[\d\s.,]*)|(\d[\d\s.,]*)\s*(zł|pln|€|eur|\$|usd))""",
-    )
+        Regex("""(?i)\b(paid|sent|spent|payment|purchase|zapłac|wysłan|wydano|transakcj|płatność)""")
 
     private val AT_MERCHANT = Regex("""(?i)\bat\s+([^\n]+)""")
 
@@ -41,15 +31,14 @@ object PaymentNotificationParser {
         Regex("""(?i)\s+using\s+.*$"""),
     )
 
-    fun parse(packageName: String, title: String, text: String): ParsedPayment? {
-        if (packageName !in SUPPORTED_PACKAGES) return null
+    fun parse(pkg: PaymentPackage, title: String, text: String): ParsedPayment? {
         val combined = "$title $text"
         if (combined.isBlank()) return null
         val lower = combined.lowercase()
         if (DENYLIST.any { it in lower }) return null
-        if (!PAYMENT_VERB.containsMatchIn(combined)) return null
-        val amount = extractAmount(combined) ?: return null
-        val merchant = extractMerchant(combined)
+        if (pkg != PaymentPackage.WALLET && !PAYMENT_VERB.containsMatchIn(combined)) return null
+        val amount = extractAmount(pkg, combined) ?: return null
+        val merchant = extractMerchant(pkg, combined)
         val displayTitle = (merchant ?: title.ifBlank { text }).trim()
         if (displayTitle.isBlank()) return null
         return ParsedPayment(
@@ -60,11 +49,24 @@ object PaymentNotificationParser {
         )
     }
 
+    fun parse(packageName: String, title: String, text: String): ParsedPayment? {
+        val pkg = PaymentPackage.fromPackage(packageName) ?: return null
+        return parse(pkg, title, text)
+    }
+
+    internal fun extractAmount(pkg: PaymentPackage, input: String): Double? {
+        for (match in pkg.amountRegexFirst.findAll(input)) {
+            normalizeAmount(match.groupValues[2])?.let { return it }
+        }
+        for (match in pkg.amountRegexLast.findAll(input)) {
+            normalizeAmount(match.groupValues[1])?.let { return it }
+        }
+        return null
+    }
+
     internal fun extractAmount(input: String): Double? {
-        for (match in AMOUNT.findAll(input)) {
-            val raw =
-                if (match.groupValues[1].isNotEmpty()) match.groupValues[2] else match.groupValues[3]
-            normalizeAmount(raw)?.let { return it }
+        for (pkg in PaymentPackage.entries) {
+            extractAmount(pkg, input)?.let { return it }
         }
         return null
     }
@@ -85,6 +87,14 @@ object PaymentNotificationParser {
             else -> s
         }
         return s.toDoubleOrNull()?.takeIf { it > 0 }
+    }
+
+    internal fun extractMerchant(pkg: PaymentPackage, input: String): String? {
+        pkg.merchantRegex?.let { regex ->
+            val raw = regex.find(input)?.groupValues?.get(1)?.trim() ?: return null
+            return raw.takeIf { it.isNotBlank() && it.length <= 64 && it.any { c -> c.isLetterOrDigit() } }
+        }
+        return extractMerchant(input)
     }
 
     internal fun extractMerchant(input: String): String? {

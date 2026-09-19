@@ -2,12 +2,17 @@ package prayit.simplebudget.core.data.repository
 
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import prayit.simplebudget.core.data.dao.ExpenseDao
 import prayit.simplebudget.core.data.dao.NotificationCacheDao
+import prayit.simplebudget.core.data.dao.NotificationDebugDao
 import prayit.simplebudget.core.data.entity.ExpenseEntity
 import prayit.simplebudget.core.data.entity.NotificationCacheEntity
+import prayit.simplebudget.core.data.entity.NotificationDebugEntity
 import prayit.simplebudget.core.domain.model.Expense
 import prayit.simplebudget.core.domain.repository.PendingExpenseRepository
+import prayit.simplebudget.core.utils.Log
 import prayit.simplebudget.di.AppScope
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -17,15 +22,20 @@ import kotlin.time.ExperimentalTime
 class NotificationCacheRepositoryImpl(
     private val cacheDao: NotificationCacheDao,
     private val expenseDao: ExpenseDao,
+    private val debugDao: NotificationDebugDao,
 ) : PendingExpenseRepository {
 
+    private val dedupMutex = Mutex()
+
     @OptIn(ExperimentalTime::class)
-    override suspend fun stageAndCommit(expense: Expense) {
+    override suspend fun stageAndCommit(expense: Expense) = dedupMutex.withLock {
         purgeExpired()
         val dateEpochDays = expense.date.toEpochDays()
-        if (cacheDao.existsDuplicate(expense.title, expense.amount, dateEpochDays, expense.tag)) {
-            return
+        if (cacheDao.existsDuplicate(expense.amount, dateEpochDays)) {
+            Log.d("NotifCache") { "DUPLICATE skipped: title='${expense.title}' amount=${expense.amount} tag='${expense.tag}'" }
+            return@withLock
         }
+        Log.d("NotifCache") { "NEW expense: title='${expense.title}' amount=${expense.amount} tag='${expense.tag}'" }
         cacheDao.insert(
             NotificationCacheEntity(
                 title = expense.title,
@@ -41,6 +51,12 @@ class NotificationCacheRepositoryImpl(
     override suspend fun purgeExpired(nowEpochMillis: Long) {
         cacheDao.deleteOlderThan(nowEpochMillis - EXPIRY_MILLIS)
     }
+
+    override suspend fun logRawNotification(json: String) {
+        debugDao.insert(NotificationDebugEntity(dataJson = json))
+    }
+
+    override suspend fun getRawNotifications(): List<String> = debugDao.getAllJson()
 
     companion object {
         private const val EXPIRY_MILLIS = 5_000L

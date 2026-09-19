@@ -9,6 +9,8 @@ interface ExportRepository {
 
     suspend fun exportHistoryXlsx(expenses: List<Expense>): Result<Unit>
 
+    suspend fun exportNotificationsJson(items: List<String>): Result<Unit>
+
     fun supportsAutoCapture(): Boolean
 
     fun isAutoCaptureEnabled(): Boolean

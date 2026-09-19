@@ -19,6 +19,25 @@ android {
         versionName = "1.0.0"
     }
 
+    buildFeatures {
+        resValues = true
+    }
+
+    flavorDimensions += "environment"
+
+    productFlavors {
+        create("production") {
+            dimension = "environment"
+            resValue("string", "app_name", "SimpleBudget")
+        }
+        create("staging") {
+            dimension = "environment"
+            applicationIdSuffix = ".staging"
+            versionNameSuffix = "-staging"
+            resValue("string", "app_name", "SimpleBudget Staging")
+        }
+    }
+
     signingConfigs {
         create("release") {
             // Secrets come from local.properties or env (RELEASE_STORE_FILE etc.).

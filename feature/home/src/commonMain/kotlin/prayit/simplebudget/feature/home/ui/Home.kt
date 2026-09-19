@@ -57,6 +57,8 @@ fun HomeScreen(
         onExportMonth = viewModel::onExportMonth,
         onExportMonthXlsx = viewModel::onExportMonthXlsx,
         onExportHistory = viewModel::onExportHistory,
+        onExportNotifications = viewModel::onExportNotifications,
+        onTestNotification = viewModel::onTestNotification,
         onTitleChanged = viewModel::onTitleChanged,
         onAmountChanged = viewModel::onAmountChanged,
         onTagSelected = viewModel::onTagSelected,
@@ -81,6 +83,8 @@ fun HomeContent(
     onExportMonth: () -> Unit = {},
     onExportMonthXlsx: () -> Unit = {},
     onExportHistory: () -> Unit = {},
+    onExportNotifications: () -> Unit = {},
+    onTestNotification: () -> Unit = {},
     onTitleChanged: (String) -> Unit = {},
     onAmountChanged: (String) -> Unit = {},
     onTagSelected: (FinancialTag) -> Unit = {},
@@ -171,6 +175,8 @@ fun HomeContent(
                 onExportMonth = onExportMonth,
                 onExportMonthXlsx = onExportMonthXlsx,
                 onExportHistory = onExportHistory,
+                onExportNotifications = onExportNotifications,
+                onTestNotification = onTestNotification,
             )
         }
     }

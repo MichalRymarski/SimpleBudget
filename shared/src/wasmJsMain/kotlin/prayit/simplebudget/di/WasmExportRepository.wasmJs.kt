@@ -11,6 +11,7 @@ import prayit.simplebudget.export.CsvGenerator
 import prayit.simplebudget.export.generateSingleMonthXlsx
 import prayit.simplebudget.export.generateXlsx
 import prayit.simplebudget.export.shareCsvFile
+import prayit.simplebudget.export.shareTextFile
 import prayit.simplebudget.export.shareXlsxFile
 
 @ContributesBinding(AppScope::class, binding = binding<ExportRepository>())
@@ -47,6 +48,14 @@ class WasmExportRepository : ExportRepository {
                     .getOrThrow()
             }
     }
+
+    override suspend fun exportNotificationsJson(items: List<String>): Result<Unit> =
+        shareTextFile(
+            "notifications.json",
+            "[${items.joinToString(",")}]",
+            "Notification debug log",
+            "application/json"
+        )
 
     override suspend fun exportHistoryXlsx(expenses: List<Expense>): Result<Unit> =
         generateXlsx(expenses).mapCatching { xlsx ->

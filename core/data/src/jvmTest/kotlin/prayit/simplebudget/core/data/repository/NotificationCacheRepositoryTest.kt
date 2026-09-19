@@ -9,8 +9,10 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import prayit.simplebudget.core.data.dao.ExpenseDao
 import prayit.simplebudget.core.data.dao.NotificationCacheDao
+import prayit.simplebudget.core.data.dao.NotificationDebugDao
 import prayit.simplebudget.core.data.entity.ExpenseEntity
 import prayit.simplebudget.core.data.entity.NotificationCacheEntity
+import prayit.simplebudget.core.data.entity.NotificationDebugEntity
 import prayit.simplebudget.core.domain.model.Expense
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -64,6 +66,20 @@ private class FakeNotificationCacheDao : NotificationCacheDao {
     }
 }
 
+private class FakeNotificationDebugDao : NotificationDebugDao {
+    val rows = mutableListOf<NotificationDebugEntity>()
+
+    override suspend fun insert(entry: NotificationDebugEntity) {
+        rows += entry
+    }
+
+    override suspend fun getAllJson(): List<String> = rows.map { it.dataJson }
+
+    override suspend fun clear() {
+        rows.clear()
+    }
+}
+
 class NotificationCacheRepositoryTest {
 
     @OptIn(ExperimentalTime::class)
@@ -71,7 +87,8 @@ class NotificationCacheRepositoryTest {
     fun stagedExpenseBecomesRealExpenseAndSurvivesCacheExpiry() = runTest {
         val expenses = FakeExpenseDao()
         val cache = FakeNotificationCacheDao()
-        val repository = NotificationCacheRepositoryImpl(cache, expenses)
+        val repository =
+            NotificationCacheRepositoryImpl(cache, expenses, FakeNotificationDebugDao())
         val title = "Biedronka"
         val expense = Expense(
             id = "notif_1",

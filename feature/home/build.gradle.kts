@@ -48,6 +48,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime)
+            implementation(project(":core:export"))
         }
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling)

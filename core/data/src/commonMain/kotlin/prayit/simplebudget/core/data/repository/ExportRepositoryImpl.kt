@@ -12,6 +12,7 @@ import prayit.simplebudget.export.generateXlsx
 import prayit.simplebudget.export.isNotificationCaptureEnabled
 import prayit.simplebudget.export.openNotificationCaptureSettings
 import prayit.simplebudget.export.shareCsvFile
+import prayit.simplebudget.export.shareTextFile
 import prayit.simplebudget.export.shareXlsxFile
 import prayit.simplebudget.export.supportsNotificationCapture
 
@@ -49,6 +50,14 @@ class ExportRepositoryImpl : ExportRepository {
                     .getOrThrow()
             }
     }
+
+    override suspend fun exportNotificationsJson(items: List<String>): Result<Unit> =
+        shareTextFile(
+            "notifications.json",
+            "[${items.joinToString(",")}]",
+            "Notification debug log",
+            "application/json"
+        )
 
     override suspend fun exportHistoryXlsx(expenses: List<Expense>): Result<Unit> =
         generateXlsx(expenses).mapCatching { xlsx ->

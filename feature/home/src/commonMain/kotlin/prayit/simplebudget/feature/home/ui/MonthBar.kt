@@ -22,6 +22,7 @@ import com.composables.icons.lucide.ChevronLeft
 import com.composables.icons.lucide.ChevronRight
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Plus
+import com.composables.icons.lucide.Settings
 import com.composables.icons.lucide.Share
 import org.jetbrains.compose.resources.stringResource
 import prayit.simplebudget.core.components.button.fab.AppFloatingActionButton
@@ -38,6 +39,7 @@ import simplebudget.core.resources.generated.resources.home_export_month_csv
 import simplebudget.core.resources.generated.resources.home_export_month_xlsx
 import simplebudget.core.resources.generated.resources.home_next_month
 import simplebudget.core.resources.generated.resources.home_previous_month
+import simplebudget.core.resources.generated.resources.settings_menu_item
 
 @Composable
 internal fun MonthBar(
@@ -50,6 +52,7 @@ internal fun MonthBar(
     onExportMonth: () -> Unit = {},
     onExportMonthXlsx: () -> Unit = {},
     onExportHistory: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
 ) {
     var showExportMenu by remember { mutableStateOf(false) }
     val spacing = LocalAppSpacing.current
@@ -118,6 +121,14 @@ internal fun MonthBar(
                         onClick = {
                             showExportMenu = false
                             onExportHistory()
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(Res.string.settings_menu_item)) },
+                        leadingIcon = { Icon(Lucide.Settings, contentDescription = null) },
+                        onClick = {
+                            showExportMenu = false
+                            onOpenSettings()
                         },
                     )
                 }

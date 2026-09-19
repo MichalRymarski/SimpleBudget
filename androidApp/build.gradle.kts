@@ -89,7 +89,9 @@ dependencies {
     implementation(libs.androidx.activityCompose)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.datetime)
+    implementation(libs.androidx.work.runtime)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
     testImplementation(kotlin("test"))
+    testImplementation(kotlin("test-junit"))
 }

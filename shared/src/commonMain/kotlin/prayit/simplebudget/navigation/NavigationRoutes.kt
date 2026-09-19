@@ -15,11 +15,15 @@ sealed interface HomeRoute : NavKey {
 @Serializable
 data class BudgetItemRoute(val id: String) : NavKey
 
+@Serializable
+data object SettingsRoute : NavKey
+
 internal val navConfig = SavedStateConfiguration {
     serializersModule = SerializersModule {
         polymorphic(NavKey::class) {
             subclass(HomeRoute.Main::class)
             subclass(BudgetItemRoute::class)
+            subclass(SettingsRoute::class)
         }
     }
 }

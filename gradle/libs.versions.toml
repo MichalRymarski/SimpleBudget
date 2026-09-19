@@ -23,6 +23,10 @@ compose-icons = "2.2.1"
 kexcel = "0.1.1"
 kmp-zip = "0.13.0"
 kotlinx-browser = "0.5.0"
+work = "2.10.0"
+javaxMail = "1.6.2"
+datastore = "1.1.7"
+cryptography = "0.6.0"
 junit = "4.13.2"
 robolectric = "4.17"
 
@@ -68,6 +72,12 @@ kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.re
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version = "2.6.2" }
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime", version.ref = "work" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+cryptography-core = { group = "dev.whyoleg.cryptography", name = "cryptography-core", version.ref = "cryptography" }
+cryptography-provider-optimal = { group = "dev.whyoleg.cryptography", name = "cryptography-provider-optimal", version.ref = "cryptography" }
+android-mail = { group = "com.sun.mail", name = "android-mail", version.ref = "javaxMail" }
+android-activation = { group = "com.sun.mail", name = "android-activation", version.ref = "javaxMail" }
 junit = { module = "junit:junit", version.ref = "junit" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 

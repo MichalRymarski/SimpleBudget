@@ -14,4 +14,21 @@ interface ExportRepository {
     fun isAutoCaptureEnabled(): Boolean
 
     fun openAutoCaptureSettings()
+
+    suspend fun sendExportEmail(
+        expenses: List<Expense>,
+        monthNumber: Int,
+        year: Int,
+        attachmentName: String,
+    ): Result<Unit>
+
+    suspend fun sendCsvEmail(
+        expenses: List<Expense>,
+        monthNumber: Int,
+        year: Int,
+    ): Result<Unit>
+
+    suspend fun sendHistoryEmail(expenses: List<Expense>): Result<Unit>
+
+    suspend fun sendTestEmail(): Result<Unit>
 }

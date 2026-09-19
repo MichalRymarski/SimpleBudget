@@ -11,5 +11,6 @@ fun createDatabase(): AppDatabase {
     return getDatabaseBuilder()
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
+        .fallbackToDestructiveMigrationOnDowngrade(true)
         .build()
 }

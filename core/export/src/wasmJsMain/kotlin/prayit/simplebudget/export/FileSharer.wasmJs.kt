@@ -36,3 +36,18 @@ actual fun shareXlsxFile(fileName: String, byteArray: ByteArray, subject: String
             }",
         )
     }
+
+@OptIn(ExperimentalEncodingApi::class)
+actual fun shareTextFile(
+    fileName: String,
+    textContent: String,
+    subject: String,
+    mimeType: String,
+): Result<Unit> =
+    runCatching {
+        download(
+            fileName,
+            mimeType,
+            "data:$mimeType;base64,${Base64.encode(textContent.encodeToByteArray())}",
+        )
+    }

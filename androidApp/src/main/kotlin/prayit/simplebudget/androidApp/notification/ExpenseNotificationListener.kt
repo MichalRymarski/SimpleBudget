@@ -15,6 +15,7 @@ import prayit.simplebudget.core.domain.model.Expense
 import prayit.simplebudget.core.domain.repository.PendingExpenseRepository
 import prayit.simplebudget.di.Graph
 import prayit.simplebudget.export.PaymentNotificationParser
+import prayit.simplebudget.export.PaymentPackage
 
 class ExpenseNotificationListener : NotificationListenerService() {
 
@@ -28,14 +29,14 @@ class ExpenseNotificationListener : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         try {
             if (sbn == null) return
-            if (sbn.packageName !in PaymentNotificationParser.SUPPORTED_PACKAGES) return
-            val extras = sbn.notification?.extras ?: return
-            val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
-            val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty()
-            val bigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString().orEmpty()
+            val extras = sbn.notification?.extras
+            val title = extras?.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
+            val text = extras?.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty()
+            val bigText = extras?.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString().orEmpty()
             val body = bigText.ifBlank { text }
+            val pkg = PaymentPackage.fromPackage(sbn.packageName) ?: return
             if (title.isBlank() && body.isBlank()) return
-            val parsed = PaymentNotificationParser.parse(sbn.packageName, title, body) ?: return
+            val parsed = PaymentNotificationParser.parse(pkg, title, body) ?: return
             val expense = Expense(
                 id = "notif_${System.currentTimeMillis()}",
                 title = parsed.title,

@@ -44,12 +44,10 @@ private class FakeNotificationCacheDao : NotificationCacheDao {
     }
 
     override suspend fun existsDuplicate(
-        title: String,
         amount: Double,
         date: Long,
-        tag: String,
     ): Boolean =
-        rows.any { it.title == title && it.amount == amount && it.date == date && it.tag == tag }
+        rows.any { it.amount == amount && it.date == date }
 
     override suspend fun deleteOlderThan(cutoff: Long) {
         rows.removeAll { it.capturedAt < cutoff }
@@ -71,7 +69,8 @@ class NotificationCacheRepositoryTest {
     fun stagedExpenseBecomesRealExpenseAndSurvivesCacheExpiry() = runTest {
         val expenses = FakeExpenseDao()
         val cache = FakeNotificationCacheDao()
-        val repository = NotificationCacheRepositoryImpl(cache, expenses)
+        val repository =
+            NotificationCacheRepositoryImpl(cache, expenses)
         val title = "Biedronka"
         val expense = Expense(
             id = "notif_1",

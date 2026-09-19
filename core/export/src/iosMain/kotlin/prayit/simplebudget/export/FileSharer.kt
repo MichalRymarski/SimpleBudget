@@ -8,3 +8,10 @@ actual fun shareCsvFile(fileName: String, csvContent: String, subject: String): 
 
 actual fun shareXlsxFile(fileName: String, byteArray: ByteArray, subject: String): Result<Unit> =
     iosSharingUnsupported()
+
+actual fun shareTextFile(
+    fileName: String,
+    textContent: String,
+    subject: String,
+    mimeType: String,
+): Result<Unit> = iosSharingUnsupported()

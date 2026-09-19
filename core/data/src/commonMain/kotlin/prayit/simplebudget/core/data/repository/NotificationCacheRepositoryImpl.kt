@@ -2,6 +2,8 @@ package prayit.simplebudget.core.data.repository
 
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import prayit.simplebudget.core.data.dao.ExpenseDao
 import prayit.simplebudget.core.data.dao.NotificationCacheDao
 import prayit.simplebudget.core.data.entity.ExpenseEntity
@@ -19,12 +21,14 @@ class NotificationCacheRepositoryImpl(
     private val expenseDao: ExpenseDao,
 ) : PendingExpenseRepository {
 
+    private val dedupMutex = Mutex()
+
     @OptIn(ExperimentalTime::class)
-    override suspend fun stageAndCommit(expense: Expense) {
+    override suspend fun stageAndCommit(expense: Expense) = dedupMutex.withLock {
         purgeExpired()
         val dateEpochDays = expense.date.toEpochDays()
-        if (cacheDao.existsDuplicate(expense.title, expense.amount, dateEpochDays, expense.tag)) {
-            return
+        if (cacheDao.existsDuplicate(expense.amount, dateEpochDays)) {
+            return@withLock
         }
         cacheDao.insert(
             NotificationCacheEntity(

@@ -10,8 +10,8 @@ interface NotificationCacheDao {
     @Insert
     suspend fun insert(entry: NotificationCacheEntity)
 
-    @Query("SELECT EXISTS(SELECT 1 FROM notification_cache WHERE title = :title AND amount = :amount AND date = :date AND tag = :tag)")
-    suspend fun existsDuplicate(title: String, amount: Double, date: Long, tag: String): Boolean
+    @Query("SELECT EXISTS(SELECT 1 FROM notification_cache WHERE amount = :amount AND date = :date)")
+    suspend fun existsDuplicate(amount: Double, date: Long): Boolean
 
     @Query("DELETE FROM notification_cache WHERE capturedAt < :cutoff")
     suspend fun deleteOlderThan(cutoff: Long)

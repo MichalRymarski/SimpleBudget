@@ -16,7 +16,7 @@ class AppActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            App(onThemeChanged = { ThemeChanged(it) }) 
+            App(onThemeChanged = { ThemeChanged(it) })
         }
     }
 }

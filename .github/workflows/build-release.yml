@@ -59,7 +59,7 @@ jobs:
         env:
           SIGNING_STORE_FILE: ${{ runner.temp }}/release.keystore
         run: |
-          ./gradlew :androidApp:assembleRelease \
+          ./gradlew :androidApp:assembleProductionRelease \
             -Pandroid.injected.signing.store.file="$SIGNING_STORE_FILE" \
             -Pandroid.injected.signing.store.password="$ANDROID_KEYSTORE_PASSWORD" \
             -Pandroid.injected.signing.key.alias="$ANDROID_KEY_ALIAS" \
@@ -70,8 +70,7 @@ jobs:
         with:
           name: signed-release-apk
           path: |
-            androidApp/build/outputs/apk/release/*.apk
-            androidApp/build/outputs/apk/*/release/*.apk
+            androidApp/build/outputs/apk/production/release/*.apk
           if-no-files-found: error
 
       - name: Determine release tag and name
@@ -97,5 +96,4 @@ jobs:
           prerelease: ${{ github.event.inputs.prerelease == 'true' }}
           body: 'Automated release created by CI'
           files: |
-            androidApp/build/outputs/apk/release/*.apk
-            androidApp/build/outputs/apk/*/release/*.apk
+            androidApp/build/outputs/apk/production/release/*.apk
